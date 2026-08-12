@@ -462,3 +462,22 @@ Response
 ### Status
 
 Patient data is now successfully stored in MongoDB.
+## Password Hashing
+
+Passwords are hashed using bcrypt before being stored in MongoDB.
+
+Flow:
+
+Plain Password
+↓
+bcrypt.hash()
+↓
+Hashed Password
+↓
+MongoDB
+## OpenHealth ID (OHID)
+
+A unique OHID is generated for every patient during registration.
+
+Purpose:
+Provides a unique identifier that can later be used by doctors, labs and family features.

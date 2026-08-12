@@ -108,3 +108,17 @@ Use `fullName` consistently across Postman, controller and model.
 
 Lesson:
 Mongoose field names are case-sensitive.
+
+## Bug 12: Duplicate Null OHID
+
+Error:
+E11000 duplicate key error: ohid: null
+
+Cause:
+OHID was marked unique but was not generated during registration.
+
+Fix:
+Generate a unique OHID before creating the patient.
+
+Lesson:
+A unique field must receive a unique value when creating a document.
