@@ -191,3 +191,24 @@ health.routes.js
 Route Handler
 ↓
 Response
+
+## Controller Layer
+
+### health.controller.js
+
+Contains the logic for health check requests.
+
+### Route-Controller Flow
+
+Browser
+↓
+Route
+↓
+Controller
+↓
+Response
+
+Benefits:
+- Cleaner routes
+- Better code organization
+- Easier testing and maintenance
