@@ -51,3 +51,32 @@ Fix:
 ```js
 export default router;
 ```
+## Bug 6: Wrong Database Import Path
+
+Error:
+ERR_MODULE_NOT_FOUND
+
+Cause:
+Incorrect relative path while importing connectDB.
+
+Fix:
+
+```js
+import connectDB from "./db/index.js";
+```
+
+---
+
+## Bug 7: Missing Default Export
+
+Error:
+does not provide an export named 'default'
+
+Cause:
+connectDB was not exported as default.
+
+Fix:
+
+```js
+export default connectDB;
+```

@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-  "dev": "nodemon src/index.js"
-},
+    "dev": "nodemon src/index.js"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Ojas-Poswal/openHealth-Backend.git"
@@ -21,7 +21,8 @@
   "dependencies": {
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "mongoose": "^9.9.2"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"

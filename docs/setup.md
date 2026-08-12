@@ -212,3 +212,90 @@ Benefits:
 - Cleaner routes
 - Better code organization
 - Easier testing and maintenance
+
+## Environment Variables
+
+### .env
+
+Stores sensitive configuration outside source code.
+
+Examples:
+- PORT
+- MONGODB_URI
+- JWT_SECRET
+- EMAIL_USER
+- EMAIL_PASSWORD
+
+### dotenv
+
+Purpose:
+Loads variables from .env into process.env.
+
+Flow:
+
+.env
+↓
+dotenv.config()
+↓
+process.env
+↓
+Application
+
+## Database Layer
+
+### db/index.js
+
+Purpose:
+Connects the application to MongoDB Atlas.
+
+### Mongoose
+
+Purpose:
+Provides a schema-based interface for MongoDB.
+
+### Connection Flow
+
+Server Start
+↓
+dotenv loads .env
+↓
+connectDB()
+↓
+MongoDB Atlas
+↓
+Connection Successful
+↓
+Start Server
+
+### Why Connect Database Before Starting Server?
+
+If the database is unavailable, the application should not accept requests.
+
+## First Model: Patient
+
+Purpose:
+Stores patient account and profile information.
+
+### Current Fields
+
+- fullName
+- email
+- phone
+- password
+- dateOfBirth
+- gender
+- bloodGroup
+- allergies
+- ohid
+
+### Mongoose Model Flow
+
+Request
+↓
+Controller
+↓
+Patient Model
+↓
+MongoDB Collection
+↓
+Database
