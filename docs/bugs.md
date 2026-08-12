@@ -80,3 +80,31 @@ Fix:
 ```js
 export default connectDB;
 ```
+
+## Bug 9: Variable Name Case Mismatch
+
+Error:
+ReferenceError: fullname is not defined
+
+Cause:
+Used `fullname` instead of the declared `fullName`.
+
+Fix:
+Use consistent variable naming.
+
+Lesson:
+JavaScript is case-sensitive.
+
+## Bug 11: Schema Field Name Mismatch
+
+Error:
+Patient validation failed: fullname is required.
+
+Cause:
+The schema used `fullname` while the controller used `fullName`.
+
+Fix:
+Use `fullName` consistently across Postman, controller and model.
+
+Lesson:
+Mongoose field names are case-sensitive.

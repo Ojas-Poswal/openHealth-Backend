@@ -299,3 +299,166 @@ Patient Model
 MongoDB Collection
 ↓
 Database
+
+## Patient Module Structure
+
+### patient.routes.js
+
+Purpose:
+Defines patient-related endpoints.
+
+Current Endpoint:
+
+```http
+POST /api/v1/patients/register
+```
+
+### patient.controller.js
+
+Purpose:
+Contains patient-related business logic.
+
+Examples:
+- Register Patient
+- Login Patient
+- Forgot Password
+- Update Profile
+
+### patient.model.js
+
+Purpose:
+Defines how patient data is stored in MongoDB.
+
+### Module Flow
+
+POST Request
+↓
+patient.routes.js
+↓
+patient.controller.js
+↓
+patient.model.js
+↓
+MongoDB
+↓
+Response
+
+## express.json()
+
+Purpose:
+Parses incoming JSON request bodies.
+
+Flow:
+
+Client
+↓
+JSON Request
+↓
+express.json()
+↓
+req.body
+↓
+Controller
+
+## Patient Module Structure
+
+### patient.routes.js
+
+Purpose:
+Defines patient-related endpoints.
+
+Current Endpoint:
+
+POST /api/v1/patients/register
+
+### patient.controller.js
+
+Purpose:
+Contains patient-related business logic.
+
+Examples:
+- Register Patient
+- Login Patient
+- Forgot Password
+
+### patient.model.js
+
+Purpose:
+Defines how patient data is stored in MongoDB.
+
+### Module Flow
+
+POST Request
+↓
+patient.routes.js
+↓
+patient.controller.js
+↓
+patient.model.js
+↓
+MongoDB
+↓
+Response
+
+## Database Layer
+
+### db/index.js
+
+Purpose:
+Connects the application to MongoDB Atlas.
+
+### Connection Flow
+
+Server Start
+↓
+dotenv loads .env
+↓
+connectDB()
+↓
+MongoDB Atlas
+↓
+Connection Successful
+↓
+Start Server
+
+### Why Connect Database Before Starting Server?
+
+If the database is unavailable, the application should not accept requests.
+
+## Patient Registration Request Flow
+
+POST /api/v1/patients/register
+
+Postman
+↓
+patient.routes.js
+↓
+patient.controller.js
+↓
+req.body
+↓
+Response
+
+## Patient Registration
+
+### Endpoint
+
+POST /api/v1/patients/register
+
+### Flow
+
+Postman
+↓
+patient.routes.js
+↓
+patient.controller.js
+↓
+Patient.create()
+↓
+MongoDB Atlas
+↓
+Response
+
+### Status
+
+Patient data is now successfully stored in MongoDB.

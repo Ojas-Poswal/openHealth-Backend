@@ -2,7 +2,7 @@ import mongoose from "mongoose"
 
 const patientSchema = new mongoose.Schema(
     {
-        fullname : {
+        fullName : {
             type : String,
             required : true,
             trim : true
@@ -24,7 +24,7 @@ const patientSchema = new mongoose.Schema(
             required : true,
         },
         dateOfBirth :{
-            type : date
+            type : Date,
         },
         gender : {
             type : String,
