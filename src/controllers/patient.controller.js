@@ -41,4 +41,10 @@ const registerPatient = async (req,res)=>{
     
 }
 
-export {registerPatient}
+const loginPatient = async (req,res) => {
+    res.json({
+        message : "Login route Working"
+    })
+}
+
+export {registerPatient,loginPatient}

@@ -1,9 +1,10 @@
 import {Router} from "express"
-import { registerPatient } from "../controllers/patient.controller.js"
+import { registerPatient,loginPatient } from "../controllers/patient.controller.js"
 
 
 const router = Router()
 
 router.post("/register",registerPatient)
+router.post("/login",loginPatient)
 
 export default router

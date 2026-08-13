@@ -504,3 +504,23 @@ catch
 Log Error
 ↓
 500 Internal Server Error
+
+## Login Endpoint
+
+POST /api/v1/patients/login
+
+Purpose:
+Authenticates an existing patient.
+
+Current Status:
+Route and controller connected successfully.
+
+Flow:
+
+Postman
+↓
+patient.routes.js
+↓
+loginPatient()
+↓
+Response
