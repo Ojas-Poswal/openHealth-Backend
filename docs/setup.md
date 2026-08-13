@@ -481,3 +481,26 @@ A unique OHID is generated for every patient during registration.
 
 Purpose:
 Provides a unique identifier that can later be used by doctors, labs and family features.
+
+## Error Handling
+
+Purpose:
+Prevents application crashes and returns meaningful responses.
+
+Flow:
+
+Request
+↓
+try
+↓
+Business Logic
+↓
+Success Response
+
+OR
+
+catch
+↓
+Log Error
+↓
+500 Internal Server Error

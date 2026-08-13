@@ -2,7 +2,9 @@ import Patient from "../models/patient.model.js"
 import bcrypt from "bcrypt"
 
 const registerPatient = async (req,res)=>{
-    const {fullName,email,phone,password} = req.body;
+
+    try{
+        const {fullName,email,phone,password} = req.body;
 
     const existingPatient = await Patient.findOne({
         $or : [{email},{phone}]
@@ -29,6 +31,14 @@ const registerPatient = async (req,res)=>{
         message : "Patient Registered Successfully",
         patient
     })
+    }
+    catch(error){
+        console.error(error);
+        return res.status(500).json({
+            message : "Internal Server Error"
+        })
+    }
+    
 }
 
 export {registerPatient}
