@@ -771,3 +771,34 @@ Return Profile
 
 Outcome:
 Profile endpoint now returns actual patient data instead of only JWT payload.
+
+## Update Patient Profile
+
+Endpoint:
+PATCH /api/v1/patients/profile
+
+Purpose:
+Allow authenticated patients to update their personal information.
+
+Fields:
+- fullName
+- phone
+- dateOfBirth
+- gender
+- bloodGroup
+- allergies
+
+Flow:
+
+JWT
+↓
+Verify Token
+↓
+Find Patient
+↓
+Update Fields
+↓
+Return Updated Profile
+
+Outcome:
+Patients can update and maintain their health profile information.

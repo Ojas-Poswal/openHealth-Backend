@@ -100,4 +100,28 @@ const getPatientProfile = async (req,res)=>{
     })
 }
 
-export {registerPatient,loginPatient,getPatientProfile}
+const updatePatientProfile = async (req,res)=>{
+    const {fullName,phone,dateOfBirth,gender,bloodGroup,allergies} = req.body;
+
+    const patient = await Patient.findByIdAndUpdate(
+        req.patient.patientID,
+        {
+            fullName,
+            phone,
+            dateOfBirth,
+            gender,
+            bloodGroup,
+            allergies
+        },
+        {
+            new : true
+        }
+    ).select("-password")
+
+    return res.status(200).json({
+        message : "Profile Updated Successfully",
+        patient
+    })
+}
+
+export {registerPatient,loginPatient,getPatientProfile,updatePatientProfile}
