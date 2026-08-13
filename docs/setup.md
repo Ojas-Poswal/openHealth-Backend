@@ -752,3 +752,22 @@ Files:
 
 Outcome:
 Implemented GET /api/v1/patients/profile as the first protected route.
+## Full Patient Profile Fetch
+
+Purpose:
+Retrieve complete patient information from MongoDB after JWT verification.
+
+Flow:
+
+JWT
+↓
+Extract patientId
+↓
+Patient.findById()
+↓
+Remove Password
+↓
+Return Profile
+
+Outcome:
+Profile endpoint now returns actual patient data instead of only JWT payload.

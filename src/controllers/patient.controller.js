@@ -89,9 +89,14 @@ const loginPatient = async (req,res) => {
 }
 
 const getPatientProfile = async (req,res)=>{
+
+    const patient = await Patient.findById(
+        req.patient.patientID
+    ).select("-password")
+
     return res.status(200).json({
         message : "Profile fetched successfully",
-        patient : req.patient
+        patient,
     })
 }
 
