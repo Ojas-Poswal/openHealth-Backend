@@ -42,9 +42,37 @@ const registerPatient = async (req,res)=>{
 }
 
 const loginPatient = async (req,res) => {
-    res.json({
-        message : "Login route Working"
-    })
+    try{
+        const {email,password} = req.body;
+
+        const patient = await Patient.findOne({email});
+
+        if(!patient){
+            return res.status(401).json({
+                message : "Invalid Credentials"
+            })
+        }
+
+        const isPasswordCorrect = await bcrypt.compare(
+            password,patient.password
+        );
+        if(!isPasswordCorrect){
+            return res.status(401).json({
+                message : "Invalid Credentials"
+            })
+        }
+
+        return res.status(200).json({
+            message : "Login Successful",
+            patient
+        })
+    }catch(error){
+        console.error(error);
+
+        return res.status(500).json({
+            message : "Internal Server Error"
+        })
+    }
 }
 
 export {registerPatient,loginPatient}

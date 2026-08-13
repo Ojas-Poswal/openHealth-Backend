@@ -524,3 +524,24 @@ patient.routes.js
 loginPatient()
 ↓
 Response
+
+## Login Authentication
+
+Purpose:
+Verifies patient credentials during login.
+
+Flow:
+
+Request
+↓
+Find Patient by Email
+↓
+Patient Found?
+├── No → Invalid Credentials
+└── Yes
+    ↓
+bcrypt.compare()
+    ↓
+Password Correct?
+    ├── No → Invalid Credentials
+    └── Yes → Login Success
