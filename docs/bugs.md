@@ -122,3 +122,41 @@ Generate a unique OHID before creating the patient.
 
 Lesson:
 A unique field must receive a unique value when creating a document.
+
+## Bug 13: JWT Secret Not Loaded
+
+Error:
+secretOrPrivateKey must have a value
+
+Cause:
+JWT_SECRET was missing or incorrectly configured in .env, causing process.env.JWT_SECRET to be undefined.
+
+Fix:
+Added JWT_SECRET to .env and restarted the server.
+
+Example:
+
+JWT_SECRET=OpenHealthSuperSecretKey123
+
+Lesson:
+Whenever a new environment variable is added, restart the server and verify it is being loaded correctly.
+
+## Bug 14: Postman Cookie Storage Error
+
+Error:
+PersistentStore: CookieStorageRemoteClient is missing
+
+Observed:
+API request completed successfully and returned HTTP 200 OK with a valid JWT token.
+
+Cause:
+Postman client-side persistence/cookie storage issue.
+
+Impact:
+No impact on backend functionality.
+
+Resolution:
+Refresh/restart Postman, re-login, or update the Postman client.
+
+Lesson:
+Always verify the HTTP status code, response body, and backend logs before assuming the backend is broken.

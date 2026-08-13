@@ -1,5 +1,7 @@
 import Patient from "../models/patient.model.js"
 import bcrypt from "bcrypt"
+import jwt from "jsonwebtoken" 
+
 
 const registerPatient = async (req,res)=>{
 
@@ -61,10 +63,21 @@ const loginPatient = async (req,res) => {
                 message : "Invalid Credentials"
             })
         }
+        
+        const token = jwt.sign(
+            {
+                patientID : patient._id,
+                ohid : patient.ohid
+            },
+            process.env.JWT_SECRET,
+            {
+                expiresIn : "7d"
+            }
+        )
 
         return res.status(200).json({
             message : "Login Successful",
-            patient
+            token
         })
     }catch(error){
         console.error(error);

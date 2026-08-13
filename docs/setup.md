@@ -545,3 +545,70 @@ bcrypt.compare()
 Password Correct?
     ├── No → Invalid Credentials
     └── Yes → Login Success
+
+## JWT (JSON Web Token)
+
+Purpose:
+Maintains user authentication after login.
+
+Flow:
+
+Login
+↓
+Generate JWT
+↓
+Send Token
+↓
+Store Token
+↓
+Use Token For Future Requests
+
+Benefits:
+- Stateless authentication
+- Secure user identification
+- Protects private routes
+
+## JWT Authentication
+
+Purpose:
+Maintains authentication after successful login.
+
+Implementation:
+
+jsonwebtoken package is used to generate a token.
+
+Payload:
+
+- patientId
+- ohid
+
+Token Expiry:
+
+7 days
+
+Flow:
+
+Login Request
+↓
+Find Patient
+↓
+bcrypt.compare()
+↓
+Generate JWT
+↓
+Send Token
+↓
+Frontend Stores Token
+
+## Login Controller
+
+Purpose:
+Authenticates an existing patient.
+
+Process:
+
+1. Receive email and password.
+2. Find patient by email.
+3. Compare password using bcrypt.compare().
+4. Generate JWT on successful authentication.
+5. Return token to the client.
