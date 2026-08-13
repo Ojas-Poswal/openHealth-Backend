@@ -124,4 +124,33 @@ const updatePatientProfile = async (req,res)=>{
     })
 }
 
-export {registerPatient,loginPatient,getPatientProfile,updatePatientProfile}
+const changePassword = async (req,res)=>{
+    const {oldPassword,newPassword} = req.body;
+    const patient = await Patient.findById(
+        req.patient.patientID
+    )
+
+    const isPasswordCorrect = await bcrypt.compare(
+        oldPassword,
+        patient.password
+    )
+
+    if(!isPasswordCorrect){
+        return res.status(401).json({
+            message : "Old password is incorrect"
+        })
+    }
+    const hashedPassword = await bcrypt.hash(
+        newPassword,
+        10
+    )
+    patient.password = hashedPassword
+
+    await patient.save();
+
+    return res.status(200).json({
+        message : "Password Changed successfully"
+    })
+}
+
+export {registerPatient,loginPatient,getPatientProfile,updatePatientProfile,changePassword}

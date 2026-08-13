@@ -802,3 +802,37 @@ Return Updated Profile
 
 Outcome:
 Patients can update and maintain their health profile information.
+
+## Change Password
+
+Endpoint:
+PATCH /api/v1/patients/change-password
+
+Purpose:
+Allow authenticated patients to securely change their password.
+
+Files:
+- patient.controller.js
+- patient.routes.js
+- auth.middleware.js
+
+Flow:
+
+JWT
+↓
+Verify Token
+↓
+Find Patient
+↓
+Verify Old Password
+↓
+bcrypt.compare()
+↓
+Hash New Password
+↓
+Save Updated Password
+↓
+Success Response
+
+Outcome:
+Authenticated patients can change their account password securely.

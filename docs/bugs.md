@@ -160,3 +160,20 @@ Refresh/restart Postman, re-login, or update the Postman client.
 
 Lesson:
 Always verify the HTTP status code, response body, and backend logs before assuming the backend is broken.
+
+## Bug
+
+Error:
+Patient validation failed: gender: `Male` is not a valid enum value.
+
+Cause:
+The gender field in the schema uses enum values:
+["male", "female", "other"]
+
+A value of "Male" was stored/sent, which does not match the enum because Mongoose enums are case-sensitive.
+
+Fix:
+Updated the gender value to use lowercase ("male") and added normalization logic before saving.
+
+Lesson:
+Always normalize enum fields before storing them in MongoDB.
