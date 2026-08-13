@@ -612,3 +612,143 @@ Process:
 3. Compare password using bcrypt.compare().
 4. Generate JWT on successful authentication.
 5. Return token to the client.
+
+## Authentication Middleware
+
+Purpose:
+Protect private routes.
+
+Flow:
+
+Request
+↓
+JWT Middleware
+↓
+Verify Token
+↓
+Extract Patient Information
+↓
+Allow Access
+
+Benefits:
+- Prevents unauthorized access
+- Identifies the logged-in patient
+- Enables protected APIs
+
+## JWT Verification Middleware
+
+File:
+src/middlewares/auth.middleware.js
+
+Purpose:
+Verifies JWT before allowing access to protected routes.
+
+Flow:
+
+Request
+↓
+Authorization Header
+↓
+jwt.verify()
+↓
+Decoded Payload
+↓
+req.patient
+↓
+next()
+
+Failure:
+401 Unauthorized
+
+## Protected Route: Patient Profile
+
+Endpoint:
+GET /api/v1/patients/profile
+
+Purpose:
+Returns information about the currently authenticated patient.
+
+Flow:
+
+Request
+↓
+JWT Middleware
+↓
+Verify Token
+↓
+Extract Payload
+↓
+Controller
+↓
+Response
+
+Requirement:
+Authorization header containing a valid JWT.
+
+## Protected Route: Patient Profile
+
+Endpoint:
+GET /api/v1/patients/profile
+
+Purpose:
+Returns information about the currently authenticated patient.
+
+Flow:
+
+Request
+↓
+JWT Middleware
+↓
+Verify Token
+↓
+Extract Payload
+↓
+Controller
+↓
+Response
+
+Requirement:
+Authorization header containing a valid JWT.
+
+## JWT Protected Routes
+
+Purpose:
+Protect sensitive endpoints so that only authenticated patients can access them.
+
+Files:
+- src/middlewares/auth.middleware.js
+- src/controllers/patient.controller.js
+- src/routes/patient.routes.js
+
+Flow:
+
+Login
+↓
+JWT Generated
+↓
+Client Sends Token
+↓
+JWT Middleware
+↓
+Token Verified
+↓
+Request Allowed
+↓
+Controller Executes
+
+Outcome:
+Successfully implemented the first protected route:
+GET /api/v1/patients/profile
+
+## JWT Protected Route
+
+Purpose:
+Protect patient-specific endpoints using JWT authentication.
+
+Files:
+- auth.middleware.js
+- patient.controller.js
+- patient.routes.js
+
+Outcome:
+Implemented GET /api/v1/patients/profile as the first protected route.

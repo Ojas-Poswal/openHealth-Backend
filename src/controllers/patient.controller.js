@@ -88,4 +88,11 @@ const loginPatient = async (req,res) => {
     }
 }
 
-export {registerPatient,loginPatient}
+const getPatientProfile = async (req,res)=>{
+    return res.status(200).json({
+        message : "Profile fetched successfully",
+        patient : req.patient
+    })
+}
+
+export {registerPatient,loginPatient,getPatientProfile}
