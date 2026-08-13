@@ -39,7 +39,14 @@ const patientSchema = new mongoose.Schema(
         ohid : {
             type : String,
             unique : true
-        }
+        },
+        resetOtp: {
+          type: String
+        },
+
+        resetOtpExpiry: {
+          type: Date
+        },
     },
     {
         timestamps : true

@@ -177,3 +177,45 @@ Updated the gender value to use lowercase ("male") and added normalization logic
 
 Lesson:
 Always normalize enum fields before storing them in MongoDB.
+
+## Bug
+
+Error:
+OTP fields were not being saved to MongoDB.
+
+Cause:
+Controller used:
+- resetotp
+- resetotpExpiry
+
+while the schema defined:
+- resetOtp
+- resetOtpExpiry
+
+Fix:
+Updated the controller field names to exactly match the schema.
+
+Lesson:
+Mongoose schema fields are case-sensitive and must match exactly.
+
+## Bug
+
+Error:
+Latest generated OTP was always reported as invalid.
+
+Cause:
+Controller used incorrect field names:
+- resetotp
+- resetotpExpiry
+
+The schema used:
+- resetOtp
+- resetOtpExpiry
+
+As a result, OTP values were never stored in MongoDB.
+
+Fix:
+Updated controller field names to exactly match schema definitions.
+
+Lesson:
+Mongoose schema fields are case-sensitive.

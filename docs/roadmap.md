@@ -9,6 +9,7 @@
 - Manage allergies
 - View AI summary
 - Manage digital will
+- Forgot Password (Email/Phone OTP)
 
 ### Doctor
 
@@ -29,3 +30,6 @@
 - Labs cannot access digital will.
 - Timeline access requires patient consent.
 - OTP required before doctor access.
+- Password reset requires OTP verification.
+- OTP expires after a limited time.
+- OTP can only be used once.

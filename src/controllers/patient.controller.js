@@ -153,4 +153,100 @@ const changePassword = async (req,res)=>{
     })
 }
 
-export {registerPatient,loginPatient,getPatientProfile,updatePatientProfile,changePassword}
+const forgotPassword = async (req,res)=>{
+    const {email} = req.body;
+
+    const patient = await Patient.findOne({email})
+
+    if(!patient){
+        return res.status(404).json({
+            message : "Patient not found"
+        })
+    }
+
+    const otp = Math.floor(
+        100000 + Math.random() * 900000
+    ).toString()
+
+    patient.resetOtp = otp;
+    patient.resetOtpExpiry = Date.now( ) + 10*60*1000
+
+    await patient.save()
+
+    return res.status(200).json({
+        message : "otp Generated successfully",
+        otp
+    })
+}
+
+const verifyOtp = async (req,res) => {
+
+    const { email, otp } = req.body;
+
+    const patient = await Patient.findOne({ email });
+
+    if(!patient){
+        return res.status(404).json({
+            message : "Patient not found"
+        });
+    }
+
+    if(patient.resetOtp !== otp){
+        return res.status(400).json({
+            message : "Invalid OTP"
+        });
+    }
+
+    if(patient.resetOtpExpiry < Date.now()){
+        return res.status(400).json({
+            message : "OTP expired"
+        });
+    }
+
+    return res.status(200).json({
+        message : "OTP verified successfully"
+    });
+}
+
+const resetPassword = async (req,res) => {
+
+    const { email, otp, newPassword } = req.body;
+
+    const patient = await Patient.findOne({ email });
+
+    if(!patient){
+        return res.status(404).json({
+            message : "Patient not found"
+        });
+    }
+
+    if(patient.resetOtp !== otp){
+        return res.status(400).json({
+            message : "Invalid OTP"
+        });
+    }
+
+    if(patient.resetOtpExpiry < Date.now()){
+        return res.status(400).json({
+            message : "OTP expired"
+        });
+    }
+
+    const hashedPassword = await bcrypt.hash(
+        newPassword,
+        10
+    );
+
+    patient.password = hashedPassword;
+
+    patient.resetOtp = undefined;
+    patient.resetOtpExpiry = undefined;
+
+    await patient.save();
+
+    return res.status(200).json({
+        message : "Password reset successful"
+    });
+}
+
+export {registerPatient,loginPatient,getPatientProfile,updatePatientProfile,changePassword,forgotPassword,verifyOtp,resetPassword}

@@ -836,3 +836,157 @@ Success Response
 
 Outcome:
 Authenticated patients can change their account password securely.
+
+## Forgot Password Architecture
+
+Purpose:
+Allow patients to reset forgotten passwords using OTP verification.
+
+Storage Strategy:
+OTP data is stored directly in the Patient document.
+
+Fields:
+- resetOtp
+- resetOtpExpiry
+
+Reason:
+Simpler implementation for MVP and avoids creating a separate OTP collection.
+
+Flow:
+
+Patient
+↓
+Request OTP
+↓
+OTP Generated
+↓
+Store OTP + Expiry
+↓
+Verify OTP
+↓
+Reset Password
+
+## Forgot Password - OTP Generation
+
+Endpoint:
+POST /api/v1/patients/forgot-password
+
+Purpose:
+Generate a password reset OTP for a registered patient.
+
+Flow:
+
+Email
+↓
+Find Patient
+↓
+Generate 6-Digit OTP
+↓
+Store OTP
+↓
+Store OTP Expiry
+↓
+Success Response
+
+Outcome:
+Patients can request a temporary OTP for password recovery.
+
+## Forgot Password - OTP Generation
+
+Endpoint:
+POST /api/v1/patients/forgot-password
+
+Purpose:
+Generate a password reset OTP for a registered patient.
+
+Fields Added:
+- resetOtp
+- resetOtpExpiry
+
+Flow:
+
+Email
+↓
+Find Patient
+↓
+Generate 6-Digit OTP
+↓
+Store OTP
+↓
+Store OTP Expiry (10 Minutes)
+↓
+Save Patient Document
+↓
+Success Response
+
+Outcome:
+Patients can request a temporary OTP for password recovery.
+
+Implementation Notes:
+- OTP is currently a randomly generated 6-digit number.
+- OTP is stored directly in the Patient document.
+- OTP expires after 10 minutes.
+- Only the latest generated OTP remains valid.
+
+## Forgot Password - OTP Verification
+
+Endpoint:
+POST /api/v1/patients/verify-otp
+
+Purpose:
+Verify the OTP generated during password recovery.
+
+Flow:
+
+Email
+↓
+Find Patient
+↓
+Compare OTP
+↓
+Check OTP Expiry
+↓
+Verification Success
+
+Outcome:
+Patient is authorized to reset the password.
+
+Validation Rules:
+- Patient must exist.
+- OTP must match the stored OTP.
+- OTP must not be expired.
+- Only the latest generated OTP is valid.
+
+## Forgot Password - Reset Password
+
+Endpoint:
+POST /api/v1/patients/reset-password
+
+Purpose:
+Allow patients to create a new password after successful OTP verification.
+
+Flow:
+
+Email
+↓
+Find Patient
+↓
+Verify OTP
+↓
+Check OTP Expiry
+↓
+Hash New Password
+↓
+Update Password
+↓
+Clear OTP Fields
+↓
+Success Response
+
+Outcome:
+Patient regains access to the account using a newly created password.
+
+Security:
+- Password is hashed using bcrypt.
+- OTP is cleared after successful reset.
+- Expired OTPs are rejected.

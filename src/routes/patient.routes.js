@@ -1,5 +1,5 @@
 import {Router} from "express"
-import { registerPatient,loginPatient,getPatientProfile,updatePatientProfile,changePassword} from "../controllers/patient.controller.js"
+import { registerPatient,loginPatient,getPatientProfile,updatePatientProfile,changePassword,forgotPassword,verifyOtp,resetPassword} from "../controllers/patient.controller.js"
 import verifyJWT from "../middlewares/auth.middleware.js"
 
 
@@ -10,5 +10,8 @@ router.post("/login",loginPatient)
 router.get("/profile",verifyJWT,getPatientProfile)
 router.patch("/profile",verifyJWT,updatePatientProfile)
 router.patch("/change-password",verifyJWT,changePassword)
+router.post("/forgot-password",forgotPassword)
+router.post( "/verify-otp",verifyOtp);
+router.post("/reset-password",resetPassword);
 
 export default router
