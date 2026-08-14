@@ -18,6 +18,20 @@
 - View medical timeline
 - Add prescriptions
 - Add remarks
+Doctor Profile
+
+Fields:
+- Full Name
+- Email
+- Phone
+- Qualification
+- Specialization
+- Registration Number
+- Workplace
+
+Notes:
+- Doctor identity belongs to the doctor, not the hospital.
+- Doctors can update workplace information when changing hospitals or opening private clinics.
 
 ### Lab
 

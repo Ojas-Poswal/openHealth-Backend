@@ -989,4 +989,64 @@ Patient regains access to the account using a newly created password.
 Security:
 - Password is hashed using bcrypt.
 - OTP is cleared after successful reset.
-- Expired OTPs are rejected.
+- Expired OTPs are rejected. 
+
+## Doctor Model
+
+Purpose:
+Stores doctor account and professional information.
+
+Fields:
+- fullName
+- email
+- phone
+- password
+- registrationNumber
+- qualification
+- specialization
+- workplace
+
+Notes:
+- Doctor identity belongs to the doctor, not the hospital.
+- Workplace can be changed when switching hospitals or opening a private clinic.
+- Registration number is unique for every doctor.
+
+## Doctor Registration
+
+Endpoint:
+POST /api/v1/doctors/register
+
+Purpose:
+Create a new doctor account.
+
+Fields:
+- fullName
+- email
+- phone
+- password
+- registrationNumber
+- qualification
+- specialization
+- workplace
+
+Validation:
+- Unique email
+- Unique phone
+- Unique registration number
+
+Security:
+- Password is hashed using bcrypt before storage.
+
+Flow:
+
+Request
+↓
+Check Existing Doctor
+↓
+Hash Password
+↓
+Create Doctor
+↓
+Store In MongoDB
+↓
+Success Response
