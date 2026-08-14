@@ -1050,3 +1050,54 @@ Create Doctor
 Store In MongoDB
 ↓
 Success Response
+
+## Doctor Health ID (DHID)
+
+Purpose:
+A unique identifier assigned to every doctor during registration.
+
+Format:
+
+DH-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+
+Benefits:
+- Unique doctor identification
+- Audit trail support
+- Prescription ownership tracking
+- Hospital-independent identity
+
+Example:
+
+DH-8a92bcf1-1234-5678-9abc-123456789def
+
+## Doctor Login
+
+Endpoint:
+POST /api/v1/doctors/login
+
+Purpose:
+Authenticates a doctor and returns a JWT token.
+
+Flow:
+
+Email + Password
+↓
+Find Doctor
+↓
+bcrypt.compare()
+↓
+Generate JWT
+↓
+Return Token
+
+JWT Payload:
+
+- doctorId
+- dhid
+
+Token Expiry:
+
+7 Days
+
+Outcome:
+Authenticated doctors can access protected APIs.

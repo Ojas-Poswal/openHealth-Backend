@@ -219,3 +219,17 @@ Updated controller field names to exactly match schema definitions.
 
 Lesson:
 Mongoose schema fields are case-sensitive.
+
+## Bug
+
+Error:
+Doctor login returned "Invalid Credentials" despite correct password.
+
+Cause:
+Doctor account was created before bcrypt hashing was implemented, resulting in an unhashed/invalid stored password.
+
+Fix:
+Deleted the old doctor record and registered again using the updated registration flow.
+
+Lesson:
+Whenever authentication logic changes, test with freshly created accounts.

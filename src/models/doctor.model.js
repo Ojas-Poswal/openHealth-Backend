@@ -34,6 +34,10 @@ const doctorSchema = new mongoose.Schema(
         specialization : {
             type : String
         },
+        dhid : {
+          type : String,
+          unique : true
+        },
         workplace : {
             type : String
         }
