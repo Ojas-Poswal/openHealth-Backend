@@ -111,4 +111,11 @@ const loginDoctor = async (req,res)=>{
     
 }
 
-export {registerDoctor,loginDoctor}
+const getDoctorProfile = async (req,res)=>{
+    return res.status(200).json({
+        message : "Doctor's profile fetched successfully",
+        doctor : req.doctor
+    })
+}
+
+export {registerDoctor,loginDoctor,getDoctorProfile}

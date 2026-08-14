@@ -233,3 +233,67 @@ Deleted the old doctor record and registered again using the updated registratio
 
 Lesson:
 Whenever authentication logic changes, test with freshly created accounts.
+
+## Protected Route: Doctor Profile
+
+Endpoint:
+GET /api/v1/doctors/profile
+
+Purpose:
+Returns information about the currently authenticated doctor.
+
+Flow:
+
+Request
+↓
+Doctor JWT Middleware
+↓
+Verify Token
+↓
+Find Doctor
+↓
+Controller
+↓
+Response
+
+Requirement:
+Authorization header containing a valid JWT.
+
+Outcome:
+Authenticated doctors can retrieve their profile information.
+
+## Bug
+
+Error:
+E11000 duplicate key error collection: openHealth.doctors index: ohid_1
+
+Cause:
+An obsolete MongoDB unique index (ohid_1) remained after schema changes.
+
+Fix:
+Deleted the old ohid_1 index from the doctors collection.
+
+Lesson:
+Removing a field from a Mongoose schema does not automatically remove its MongoDB index.
+
+## Bug
+
+Error:
+Protected doctor profile route returned "Invalid Token".
+
+Cause:
+Authorization header token was extracted correctly, but the Node.js process object was mistakenly passed to jwt.verify() instead of the JWT token.
+
+Incorrect:
+
+jwt.verify(process, process.env.JWT_SECRET)
+
+Correct:
+
+jwt.verify(token, process.env.JWT_SECRET)
+
+Fix:
+Replaced process with token in JWT verification.
+
+Lesson:
+Always verify that the extracted token variable is passed to jwt.verify().

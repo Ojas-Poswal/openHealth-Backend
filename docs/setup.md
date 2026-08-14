@@ -1101,3 +1101,37 @@ Token Expiry:
 
 Outcome:
 Authenticated doctors can access protected APIs.
+
+## Doctor Authentication Middleware
+
+File:
+src/middlewares/doctorAuth.middleware.js
+
+Purpose:
+Protects doctor-only routes by verifying JWT tokens.
+
+Flow:
+
+Request
+↓
+Authorization Header
+↓
+Extract Token
+↓
+jwt.verify()
+↓
+Find Doctor
+↓
+req.doctor
+↓
+next()
+
+Failure Cases:
+
+- Missing Token → 401 Unauthorized
+- Invalid Token → 401 Unauthorized
+- Doctor Not Found → 404 Not Found
+
+Outcome:
+Only authenticated doctors can access protected doctor routes.
+
