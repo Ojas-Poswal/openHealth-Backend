@@ -1135,3 +1135,32 @@ Failure Cases:
 Outcome:
 Only authenticated doctors can access protected doctor routes.
 
+## Medical Case Model
+
+Purpose:
+Stores a complete medical case for a patient.
+
+Examples:
+
+- ACL Injury
+- Diabetes
+- Seasonal Allergy
+- Vitamin D Deficiency
+
+Contains:
+
+- Diagnosis
+- Reports
+- Prescriptions
+- Doctors
+- Verdict
+- Final Advice
+- Status
+
+Benefits:
+
+- Organizes medical history into cases
+- Enables expandable timeline UI
+- Supports future AI summaries
+- Supports doctor and lab integrations
+
