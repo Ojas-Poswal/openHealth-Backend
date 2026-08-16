@@ -1257,3 +1257,21 @@ if (
 
 Lesson:
 Authentication confirms identity. Authorization confirms permissions. Both are required when handling sensitive medical records.
+
+## Timeline Backend V1
+
+Implemented APIs:
+
+- Create Medical Case
+- Get My Medical Cases
+- Get Medical Case By ID
+
+Security:
+
+- JWT Authentication
+- Ownership Verification
+- Protected Patient Routes
+
+Outcome:
+
+Patients can create medical cases, view their medical timeline, and access detailed information for individual cases.

@@ -78,4 +78,4 @@ const getMedicalCaseByID = async (req,res) => {
     }
 }
 
-export {createMedicalCase,getMyMedicalCases}
+export {createMedicalCase,getMyMedicalCases,getMedicalCaseByID}
