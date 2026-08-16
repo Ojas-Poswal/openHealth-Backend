@@ -1,14 +1,15 @@
 import jwt from "jsonwebtoken"
 
-const verifyJWT = async (req,resizeBy,next)=>{
+const verifyJWT = async (req,res,next)=>{
     try{
-        const token = req.header("Authorization")
+        const authHeader = req.header("Authorization")
 
-        if(!token){
-            return res.send(401).json({
-                message : "Unauthorized request"
+        if(!authHeader){
+            return res.status(401).json({
+                message : "unauthorized request"
             })
         }
+        const token = authHeader.split(" ")[1];
 
         const decodedToken = jwt.verify(
             token,
@@ -16,6 +17,7 @@ const verifyJWT = async (req,resizeBy,next)=>{
         );
 
         req.patient = decodedToken;
+        console.log(decodedToken);
 
         next()
     }catch(error){

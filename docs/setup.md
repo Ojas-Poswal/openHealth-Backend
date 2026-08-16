@@ -1164,3 +1164,96 @@ Benefits:
 - Supports future AI summaries
 - Supports doctor and lab integrations
 
+## Create Medical Case
+
+Endpoint:
+POST /api/v1/medical-case/create
+
+Purpose:
+Creates a new medical case for an authenticated patient.
+
+Flow:
+
+Patient
+↓
+JWT Verification
+↓
+Extract Medical Case Data
+↓
+MedicalCase.create()
+↓
+MongoDB
+↓
+Success Response
+
+Request Body:
+
+{
+  "diagnosis": "ACL Injury",
+  "verdict": "Grade 2 ACL Sprain",
+  "finalAdvice": "Continue Physiotherapy"
+}
+
+Outcome:
+A new medical case is created and added to the patient's medical timeline.
+
+## Get Medical Case By ID
+
+Endpoint:
+GET /api/v1/medical-case/:caseId
+
+Purpose:
+Returns a specific medical case belonging to the authenticated patient.
+
+Flow:
+
+Request
+↓
+Patient JWT Middleware
+↓
+Verify Token
+↓
+Extract caseId from URL
+↓
+MedicalCase.findById()
+↓
+Ownership Verification
+↓
+Success Response
+
+Requirement:
+Authorization header containing a valid patient JWT.
+
+Security:
+Patients can only access medical cases that belong to them.
+
+Failure Cases:
+
+- Invalid Case ID → 404 Not Found
+- Case Does Not Exist → 404 Not Found
+- Case Belongs To Another Patient → 403 Forbidden
+
+Outcome:
+Returns complete information for a single medical case, enabling expandable timeline views in the frontend.
+
+## Security Improvement
+
+Issue:
+Any authenticated patient could potentially access another patient's medical case if they knew the case ID.
+
+Fix:
+Added ownership verification before returning medical case data.
+
+Implementation:
+
+if (
+    medicalCase.patientId.toString() !==
+    req.patient.patientID
+){
+    return res.status(403).json({
+        message : "Access denied"
+    })
+}
+
+Lesson:
+Authentication confirms identity. Authorization confirms permissions. Both are required when handling sensitive medical records.

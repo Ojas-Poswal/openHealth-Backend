@@ -297,3 +297,87 @@ Replaced process with token in JWT verification.
 
 Lesson:
 Always verify that the extracted token variable is passed to jwt.verify().
+
+## Bug
+
+Error:
+MedicalCase creation failed with:
+
+ValidationError: patientId is required
+
+Cause:
+The JWT payload stored the patient identifier as:
+
+patientID
+
+but the controller attempted to access:
+
+req.patient.patientId
+
+Because JavaScript is case-sensitive, the value became undefined and Mongoose validation failed.
+
+Fix:
+Updated the controller to use the correct field from the decoded JWT payload.
+
+Lesson:
+When using JWT payload data, ensure field names match exactly. A small casing mismatch can cause undefined values and validation failures.
+
+## Bug
+
+Error:
+GET /medical-case/my-cases returned 404 Not Found.
+
+Cause:
+The route was registered as:
+
+router.get("my-cases", ...)
+
+instead of:
+
+router.get("/my-cases", ...)
+
+Because the leading slash was missing, Express could not match the URL.
+
+Fix:
+Added the missing "/" before the route path.
+
+Lesson:
+Express route paths should always begin with "/" to ensure proper URL mapping.
+
+## Bug
+
+Error:
+GET /medical-case/my-cases returned 401 Unauthorized.
+
+Cause:
+The request was sent without a valid Authorization header containing the patient JWT.
+
+Fix:
+Added the Authorization header in Postman using:
+
+Authorization: Bearer <token>
+
+Lesson:
+Protected routes require a valid JWT token in the Authorization header. Always test authenticated APIs with a fresh token.
+
+## Bug
+
+Error:
+MedicalCase endpoint returned incorrect results when route parameters were expected.
+
+Cause:
+The controller attempted to read caseId from req.body instead of req.params.
+
+Incorrect:
+
+const { caseId } = req.body
+
+Correct:
+
+const { caseId } = req.params
+
+Fix:
+Retrieved the route parameter using req.params.
+
+Lesson:
+Data in URL routes (/:id) is accessed through req.params, not req.body.
