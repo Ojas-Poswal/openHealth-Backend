@@ -381,3 +381,57 @@ Retrieved the route parameter using req.params.
 
 Lesson:
 Data in URL routes (/:id) is accessed through req.params, not req.body.
+
+## Bug
+
+Error:
+POST /api/v1/reports/create executed the Medical Case controller instead of the Report controller.
+
+Cause:
+reportRouter was incorrectly imported from:
+
+./routes/medicalCase.routes.js
+
+instead of:
+
+./routes/report.routes.js
+
+As a result, requests sent to:
+
+/api/v1/reports/create
+
+were handled by the Medical Case routes.
+
+Fix:
+Updated app.js to import the correct report router.
+
+Incorrect:
+
+import reportRouter from "./routes/medicalCase.routes.js"
+
+Correct:
+
+import reportRouter from "./routes/report.routes.js"
+
+Lesson:
+Always verify that route imports match the feature being registered. A wrong router import can silently redirect requests to unrelated controllers.
+
+## Bug
+
+Error:
+Report routes failed to register correctly.
+
+Cause:
+The router instance was mistakenly referenced as:
+
+req.post(...)
+
+instead of:
+
+router.post(...)
+
+Fix:
+Replaced req.post() with router.post().
+
+Lesson:
+Route definitions must be attached to the Express Router instance, not the request object.

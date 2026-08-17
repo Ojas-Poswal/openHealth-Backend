@@ -1275,3 +1275,109 @@ Security:
 Outcome:
 
 Patients can create medical cases, view their medical timeline, and access detailed information for individual cases.
+
+## Report Model
+
+Purpose:
+Stores medical reports associated with a specific medical case.
+
+Examples:
+
+- MRI Report
+- X-Ray Report
+- Blood Test Report
+- Prescription PDF
+
+Relationships:
+
+Patient
+↓
+Medical Case
+↓
+Report
+
+Fields:
+
+- medicalCaseId
+- reportName
+- reportType
+- fileUrl
+- fileType
+- uploadedByType
+- uploadedById
+
+Report Types:
+
+- Blood Test
+- MRI
+- X-Ray
+- CT-Scan
+- Ultrasound
+- Prescription
+- Other
+
+Uploader Types:
+
+- Patient
+- Doctor
+- Lab
+
+Benefits:
+
+- Keeps reports organized under a medical case
+- Supports PDF and image uploads
+- Enables future AI analysis
+- Enables doctor, patient and lab uploads
+- Supports expandable timeline UI
+
+Outcome:
+
+Medical reports can be linked to medical cases while maintaining scalability for future integrations.
+
+## Create Report API
+
+Endpoint:
+POST /api/v1/reports/create
+
+Purpose:
+Creates a medical report and links it to an existing medical case.
+
+Flow:
+
+Patient JWT
+↓
+Verify Token
+↓
+Verify Medical Case Exists
+↓
+Verify Ownership
+↓
+Report.create()
+↓
+MongoDB
+↓
+Success Response
+
+Request Body:
+
+{
+  "medicalCaseId": "...",
+  "reportName": "MRI Report",
+  "reportType": "MRI",
+  "fileUrl": "https://example.com/mri-report.pdf",
+  "fileType": "pdf"
+}
+
+Security:
+
+- Medical Case must exist
+- Medical Case must belong to the authenticated patient
+
+Report Metadata:
+
+- uploadedByType = Patient
+- uploadedById = Authenticated Patient ID
+
+Outcome:
+
+Patients can upload reports to their own medical cases while preventing unauthorized access to other patients' records.
