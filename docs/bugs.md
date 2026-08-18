@@ -435,3 +435,25 @@ Replaced req.post() with router.post().
 
 Lesson:
 Route definitions must be attached to the Express Router instance, not the request object.
+
+## Bug
+
+Error:
+CastError: Cast to ObjectId failed for value ":<id>"
+
+Cause:
+The route parameter was sent with the leading ":" character.
+
+Incorrect:
+
+/api/v1/reports/case/:6a81cae1ab31e2be10ed6adc
+
+Correct:
+
+/api/v1/reports/case/6a81cae1ab31e2be10ed6adc
+
+Fix:
+Removed the ":" from the URL value and passed only the ObjectId.
+
+Lesson:
+The ":" character is used only when defining Express route parameters. It should never be included in actual API requests.

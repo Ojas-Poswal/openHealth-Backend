@@ -1381,3 +1381,48 @@ Report Metadata:
 Outcome:
 
 Patients can upload reports to their own medical cases while preventing unauthorized access to other patients' records.
+
+## Get Reports By Medical Case
+
+Endpoint:
+GET /api/v1/reports/case/:medicalCaseId
+
+Purpose:
+Returns all reports belonging to a specific medical case.
+
+Flow:
+
+Patient JWT
+↓
+Verify Token
+↓
+Find Medical Case
+↓
+Verify Ownership
+↓
+Report.find()
+↓
+Success Response
+
+Requirement:
+
+- Valid Patient JWT
+- Medical Case must exist
+- Medical Case must belong to authenticated patient
+
+Response:
+
+[
+  {
+    "reportName": "MRI Report",
+    "reportType": "MRI"
+  },
+  {
+    "reportName": "Blood Test",
+    "reportType": "Blood Test"
+  }
+]
+
+Outcome:
+
+Patients can retrieve all reports associated with a medical case while ensuring report access remains restricted to the owner of the medical case.
