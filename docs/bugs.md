@@ -499,3 +499,25 @@ const medicalCase = await MedicalCase.findById(
 
 Lesson:
 Always validate database query results before accessing their properties.
+
+## Bug
+
+Error:
+ERR_MODULE_NOT_FOUND while importing doctorNote.controller
+
+Cause:
+The controller import path was missing the .js extension in an ES Module project.
+
+Incorrect:
+
+import { createDoctorNote } from "../controllers/doctorNote.controller"
+
+Correct:
+
+import { createDoctorNote } from "../controllers/doctorNote.controller.js"
+
+Fix:
+Added the .js extension to the import path.
+
+Lesson:
+When using Node.js ES Modules, local file imports must include the file extension.

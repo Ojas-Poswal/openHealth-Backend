@@ -1472,3 +1472,79 @@ Report
 Outcome:
 
 Patients can securely access individual reports while preventing unauthorized access to reports belonging to other patients.
+
+## Doctor Note Model
+
+Purpose:
+Stores doctor observations and comments associated with a medical report.
+
+Relationship:
+
+Patient
+↓
+Medical Case
+↓
+Report
+↓
+Doctor Note
+
+Fields:
+
+- reportId
+- doctorId
+- note
+
+Benefits:
+
+- Allows doctors to comment on reports
+- Maintains report-specific observations
+- Supports multiple doctor opinions
+- Provides structured medical feedback
+
+Outcome:
+
+Doctors can attach professional observations directly to reports while maintaining a scalable medical record structure.
+
+## Create Doctor Note API
+
+Endpoint:
+POST /api/v1/doctor-notes/create
+
+Purpose:
+Allows authenticated doctors to add notes to medical reports.
+
+Flow:
+
+Doctor JWT
+↓
+Verify Token
+↓
+Find Report
+↓
+Verify Report Exists
+↓
+DoctorNote.create()
+↓
+MongoDB
+↓
+Success Response
+
+Request Body:
+
+{
+  "reportId": "...",
+  "note": "ACL tear visible in MRI. Continue physiotherapy."
+}
+
+Security:
+
+- Valid Doctor JWT required
+- Report must exist
+
+Metadata:
+
+- doctorId is automatically extracted from authenticated doctor
+
+Outcome:
+
+Doctors can attach professional observations and recommendations to patient reports.
