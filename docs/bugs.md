@@ -457,3 +457,45 @@ Removed the ":" from the URL value and passed only the ObjectId.
 
 Lesson:
 The ":" character is used only when defining Express route parameters. It should never be included in actual API requests.
+
+## Bug
+
+Error:
+Application crashed while fetching a report by ID.
+
+Cause:
+The controller attempted to access:
+
+report.medicalCaseId
+
+before checking whether the report existed.
+
+Incorrect:
+
+const report = await Report.findById(reportId);
+
+const medicalCase = await MedicalCase.findById(
+    report.medicalCaseId
+);
+
+if(!report){
+    ...
+}
+
+Fix:
+Moved the null check immediately after fetching the report.
+
+Correct:
+
+const report = await Report.findById(reportId);
+
+if(!report){
+    ...
+}
+
+const medicalCase = await MedicalCase.findById(
+    report.medicalCaseId
+);
+
+Lesson:
+Always validate database query results before accessing their properties.

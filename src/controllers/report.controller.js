@@ -71,4 +71,47 @@ const getReportsByMedicalCase = async (req,res) => {
   }
 }
 
-export {createReport,getReportsByMedicalCase}
+const getReportById = async (req,res) => {
+  try{
+
+    const {reportId} = req.params
+
+    const report = await Report.findById(reportId)
+
+     if(!report){
+      return res.status(404).json({
+        message : "Report doesn't exist"
+      })
+    }
+
+    
+
+    const medicalCase = await MedicalCase.findById(
+      report.medicalCaseId
+    )
+
+   
+
+    if(medicalCase.patientId.toString() != req.patient.patientID){
+      return res.status(403).json({
+        message : "Access Denied"
+      })
+    }
+
+    return res.status(200).json({
+      message: "Report fetched",
+      report
+    });
+    
+
+
+  }catch(error){
+    console.error(error);
+
+    return res.status(500).json({
+      message : "Internal Server Error"
+    })
+  }
+}
+
+export {createReport,getReportsByMedicalCase,getReportById}

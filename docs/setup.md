@@ -1426,3 +1426,49 @@ Response:
 Outcome:
 
 Patients can retrieve all reports associated with a medical case while ensuring report access remains restricted to the owner of the medical case.
+
+## Get Report By ID
+
+Endpoint:
+GET /api/v1/reports/:reportId
+
+Purpose:
+Returns details of a specific report.
+
+Flow:
+
+Patient JWT
+↓
+Verify Token
+↓
+Find Report
+↓
+Verify Report Exists
+↓
+Find Medical Case
+↓
+Verify Ownership
+↓
+Success Response
+
+Requirement:
+
+- Valid Patient JWT
+- Report must exist
+- Report must belong to a medical case owned by the authenticated patient
+
+Security:
+
+Ownership is verified through the parent Medical Case rather than the Report itself.
+
+Relationship:
+
+Patient
+↓
+Medical Case
+↓
+Report
+
+Outcome:
+
+Patients can securely access individual reports while preventing unauthorized access to reports belonging to other patients.
