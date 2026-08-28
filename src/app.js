@@ -5,8 +5,11 @@ import doctorRouter from "./routes/doctor.routes.js"
 import medicalCaseRouter from "./routes/medicalCase.routes.js"
 import reportRouter from "./routes/report.routes.js"
 import doctorNoteRouter from "./routes/doctorNote.routes.js"
+import cors from "cors"
 
 const app = express()
+
+app.use(cors())
 
 app.use(express.json());
 

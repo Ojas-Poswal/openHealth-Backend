@@ -114,4 +114,53 @@ const getReportById = async (req,res) => {
   }
 }
 
-export {createReport,getReportsByMedicalCase,getReportById}
+const deleteReport = async (req,res) => {
+   console.log("DELETE HIT");
+  console.log(req.params);
+  try{
+    const {reportId} = req.params
+
+    const report = await Report.findById(reportId)
+    console.log("REPORT:", report);
+    if(!report){
+      return res.status(404).json({
+        message: "Report Not Found"
+      })
+    }
+    console.log(report.medicalCaseId);
+    const medicalCase = await MedicalCase.findOne({
+      _id: report.medicalCaseId,
+    });
+    console.log("MEDICALCASE:", medicalCase);
+
+    console.log(MedicalCase.collection.name);
+
+    if(!medicalCase){
+      return res.status(404).json({
+        message: "Medical case Not Found"
+      })
+    }
+
+    if(
+      medicalCase.patientId.toString() !== req.patient.patientID
+    ){
+      return res.status(403).json({
+        message : "Access Denied"
+      })
+    }
+
+    await Report.findByIdAndDelete(reportId)
+
+    return res.status(200).json({
+      message : "Report Deleted Successfully"
+    })
+  }catch(error){
+    console.error(error);
+
+    return res.status(500).json({
+      message : "Internal Server Error"
+    })
+  }
+}
+
+export {createReport,getReportsByMedicalCase,getReportById,deleteReport}
