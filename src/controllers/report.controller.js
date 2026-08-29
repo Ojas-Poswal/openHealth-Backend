@@ -163,4 +163,55 @@ const deleteReport = async (req,res) => {
   }
 }
 
-export {createReport,getReportsByMedicalCase,getReportById,deleteReport}
+const updateReport = async (req,res) => {
+  try{
+     const {reportId} = req.params;
+     const {reportName,reportType} = req.body
+
+     const report = await Report.findById(reportId)
+
+     if(!report){
+      return res.status(404).json({
+        message : "Report not found"
+      })
+     }
+     
+     const medicalCase = await MedicalCase.findOne({
+      _id: report.medicalCaseId,
+     })
+
+     if(!medicalCase){
+       return res.status(404).json({
+        message : "Medical Case not found"
+      })
+     }
+
+      if (
+      medicalCase.patientId.toString() !==
+      req.patient.patientID
+    ) {
+      return res.status(403).json({
+        message: "Access denied",
+      });
+    }
+
+    if (reportName) report.reportName = reportName;
+    if (reportType) report.reportType = reportType;
+
+    await report.save();
+
+    return res.status(200).json({
+      message: "Report updated successfully",
+      report,
+    });
+
+  }catch(error){
+   console.error(error);
+
+    return res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+}
+
+export {createReport,getReportsByMedicalCase,getReportById,deleteReport,updateReport}
