@@ -1548,3 +1548,236 @@ Metadata:
 Outcome:
 
 Doctors can attach professional observations and recommendations to patient reports.
+
+# Report Delete API
+
+## Endpoint
+
+```http
+DELETE /api/v1/reports/:reportId
+```
+
+## Purpose
+
+Allows patients to permanently delete a report.
+
+## Security
+
+- Valid Patient JWT required
+- Report must exist
+- Parent Medical Case must exist
+- Medical Case must belong to the authenticated patient
+
+## Flow
+
+Patient JWT
+
+↓
+
+Verify Patient
+
+↓
+
+Find Report
+
+↓
+
+Find Parent Medical Case
+
+↓
+
+Verify Ownership
+
+↓
+
+Delete Report
+
+↓
+
+Success Response
+
+## Outcome
+
+Patients can securely remove reports from their medical records while preventing unauthorized deletions.
+
+# Report Update API
+
+## Endpoint
+
+```http
+PATCH /api/v1/reports/:reportId
+```
+
+## Purpose
+
+Allows patients to update report metadata.
+
+## Updatable Fields
+
+- reportName
+- reportType
+
+## Security
+
+- Valid Patient JWT required
+- Report must exist
+- Parent Medical Case must exist
+- Medical Case must belong to the authenticated patient
+
+## Flow
+
+Patient JWT
+
+↓
+
+Verify Patient
+
+↓
+
+Find Report
+
+↓
+
+Find Parent Medical Case
+
+↓
+
+Verify Ownership
+
+↓
+
+Update Fields
+
+↓
+
+Save Report
+
+↓
+
+Success Response
+
+## Outcome
+
+Patients can maintain accurate report information without re-uploading files.
+
+# Doctor Change Password API
+
+## Endpoint
+
+```http
+PATCH /api/v1/doctors/change-password
+```
+
+## Purpose
+
+Allows authenticated doctors to securely change their account password.
+
+## Request Body
+
+```json
+{
+  "oldPassword": "old123",
+  "newPassword": "new123"
+}
+```
+
+## Security
+
+- Valid Doctor JWT required
+- Doctor account must exist
+- Old password must match current password
+
+## Flow
+
+Doctor JWT
+
+↓
+
+Verify Doctor
+
+↓
+
+Find Doctor
+
+↓
+
+Compare Old Password
+
+↓
+
+Hash New Password
+
+↓
+
+Update Password
+
+↓
+
+Success Response
+
+## Outcome
+
+Doctors can securely update their account credentials without administrator intervention.
+
+---
+
+# Report Update API
+
+## Endpoint
+
+```http
+PATCH /api/v1/reports/:reportId
+```
+
+## Purpose
+
+Allows patients to update report details.
+
+## Updatable Fields
+
+- reportName
+- reportType
+
+## Security
+
+- Valid Patient JWT required
+- Report must exist
+- Medical Case must belong to the authenticated patient
+
+## Flow
+
+Patient JWT
+
+↓
+
+Verify Patient
+
+↓
+
+Find Report
+
+↓
+
+Find Parent Medical Case
+
+↓
+
+Verify Ownership
+
+↓
+
+Update Report
+
+↓
+
+Save Changes
+
+↓
+
+Success Response
+
+## Outcome
+
+Patients can modify report metadata without re-uploading documents.
+
+---

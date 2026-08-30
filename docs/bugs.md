@@ -521,3 +521,98 @@ Added the .js extension to the import path.
 
 Lesson:
 When using Node.js ES Modules, local file imports must include the file extension.
+
+# Bug
+
+## Error
+
+MedicalCase returned null while deleting a report.
+
+## Incorrect
+
+```js
+const medicalCase = await MedicalCase.findById(
+  report.medicalCaseId
+);
+```
+
+## Fix
+
+```js
+const medicalCase = await MedicalCase.findOne({
+  _id: report.medicalCaseId
+});
+```
+
+## Result
+
+The parent Medical Case was successfully located and report deletion worked correctly.
+
+## Lesson
+
+Always verify referenced documents exist and validate relationships before performing ownership checks.
+
+# Bug
+
+## Error
+
+MedicalCase returned null while deleting a report.
+
+## Incorrect
+
+```js
+const medicalCase = await MedicalCase.findById(
+  report.medicalCaseId
+);
+```
+
+## Fix
+
+```js
+const medicalCase = await MedicalCase.findOne({
+  _id: report.medicalCaseId
+});
+```
+
+## Result
+
+The parent Medical Case was successfully located and report deletion worked correctly.
+
+## Lesson
+
+Always verify referenced documents exist and validate relationships before performing ownership checks.
+
+# Bug
+
+## Error
+
+```txt
+doctor.isPasswordCorrect is not a function
+```
+
+## Cause
+
+The Doctor model did not implement an `isPasswordCorrect()` method, but the controller attempted to call it.
+
+## Incorrect
+
+```js
+await doctor.isPasswordCorrect(oldPassword);
+```
+
+## Correct
+
+```js
+const isPasswordCorrect = await bcrypt.compare(
+  oldPassword,
+  doctor.password
+);
+```
+
+## Fix
+
+Removed the invalid method call and used direct bcrypt password comparison.
+
+## Lesson
+
+Maintain a consistent password validation strategy across authentication modules.
