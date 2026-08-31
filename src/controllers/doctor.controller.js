@@ -163,4 +163,50 @@ const changePassword = async (req,res) => {
 
 }
 
-export {registerDoctor,loginDoctor,getDoctorProfile,changePassword}
+const updateProfile = async (req,res) => {
+    
+  try{
+    
+     const {
+        fullName,
+        phone,
+        qualification,
+        specialization,
+        workplace
+     } = req.body;
+
+     
+
+     const doctor = await Doctor.findById(req.doctor._id);
+
+     console.log(req.doctor);
+
+     if(!doctor){
+        return res.status(404).json({
+            message : "Doctor Not Found"
+        })
+     }
+
+     if(fullName) doctor.fullName = fullName;
+     if(phone) doctor.phone = phone;
+     if(qualification) doctor.qualification = qualification;
+     if(specialization) doctor.specialization = specialization;
+     if(workplace) doctor.workplace = workplace;
+
+     await doctor.save();
+
+     return res.status(200).json({
+        message : "Profile Updated Successfully",
+        doctor,
+     })
+
+  }catch(error){
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+}
+
+export {registerDoctor,loginDoctor,getDoctorProfile,changePassword,updateProfile}

@@ -1781,3 +1781,83 @@ Success Response
 Patients can modify report metadata without re-uploading documents.
 
 ---
+
+# Doctor Profile Update API
+
+## Endpoint
+
+```http
+PATCH /api/v1/doctors/profile
+```
+
+## Purpose
+
+Allows authenticated doctors to update their professional profile information.
+
+## Updatable Fields
+
+- fullName
+- phone
+- qualification
+- specialization
+- workplace
+
+## Security
+
+- Valid Doctor JWT required
+- Doctor account must exist
+
+## Flow
+
+Doctor JWT
+
+↓
+
+Verify Doctor
+
+↓
+
+Find Doctor
+
+↓
+
+Validate Doctor Exists
+
+↓
+
+Update Allowed Fields
+
+↓
+
+Save Changes
+
+↓
+
+Success Response
+
+## Request Body
+
+```json
+{
+  "fullName": "Dr. John Doe",
+  "phone": "9876543210",
+  "qualification": "MBBS, MS Orthopedics",
+  "specialization": "Orthopedic",
+  "workplace": "AIIMS Delhi"
+}
+```
+
+## Response
+
+```json
+{
+  "message": "Profile Updated Successfully",
+  "doctor": {}
+}
+```
+
+## Outcome
+
+Doctors can keep their professional information up to date, enabling accurate representation across the OpenHealth ecosystem.
+
+---
