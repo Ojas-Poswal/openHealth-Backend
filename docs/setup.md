@@ -1861,3 +1861,79 @@ Success Response
 Doctors can keep their professional information up to date, enabling accurate representation across the OpenHealth ecosystem.
 
 ---
+
+# Medical Case Status Update API
+
+## Endpoint
+
+```http
+PATCH /api/v1/medical-cases/:caseId/status
+```
+
+## Purpose
+
+Allows patients to update the status of a medical case.
+
+## Supported Status Values
+
+- active
+- resolved
+
+## Security
+
+- Valid Patient JWT required
+- Medical Case must exist
+- Medical Case must belong to the authenticated patient
+
+## Request Body
+
+```json
+{
+  "status": "resolved"
+}
+```
+
+## Flow
+
+Patient JWT
+
+↓
+
+Verify Patient
+
+↓
+
+Find Medical Case
+
+↓
+
+Verify Ownership
+
+↓
+
+Validate Status
+
+↓
+
+Update Status
+
+↓
+
+Save Changes
+
+↓
+
+Success Response
+
+## Response
+
+```json
+{
+  "message": "Case status updated",
+  "medicalCase": {}
+}
+```
+
+## Outcome
+
+Patients can mark medical cases as active or resolved, enabling accurate timeline visualization, active case tracking, and future doctor/lab workflows.

@@ -78,4 +78,48 @@ const getMedicalCaseByID = async (req,res) => {
     }
 }
 
-export {createMedicalCase,getMyMedicalCases,getMedicalCaseByID}
+const updateCaseStatus = async (req,res) => {
+    try{
+        const {caseId} = req.params
+        const {status} = req.body
+
+        if(!["active","resolved"].includes(status)){
+            return res.status(400).json({
+                message : "Invalid status"
+            })
+        }
+
+        
+
+        const medicalCase = await MedicalCase.findById(caseId);
+
+        if(!medicalCase){
+            return res.status(404).json({
+                message : "Medical Case Not Found"
+            })
+           
+        }
+        if(medicalCase.patientId.toString() !== req.patient.patientID){
+                return res.status(403).json({
+                    message : "Access Denied"
+                })
+        }
+
+        medicalCase.status = status
+
+        await medicalCase.save()
+
+        return res.status(200).json({
+            message : "Medical Case Status Updated Successfully",
+            medicalCase
+        })
+
+    }catch(error){
+        console.error(error);
+        return res.status(500).json({
+            message : "Internal Server Error"
+        })
+    }
+}
+
+export {createMedicalCase,getMyMedicalCases,getMedicalCaseByID,updateCaseStatus}
