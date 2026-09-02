@@ -1937,3 +1937,52 @@ Success Response
 ## Outcome
 
 Patients can mark medical cases as active or resolved, enabling accurate timeline visualization, active case tracking, and future doctor/lab workflows.
+
+## Patient Timeline API
+
+### Endpoint
+
+**GET** `/api/v1/medical-cases/timeline`
+
+### Authentication
+
+Requires a valid Patient JWT.
+
+```text
+Authorization: Bearer <patient-token>
+```
+
+### Description
+
+Fetches the authenticated patient's complete medical timeline.
+
+The timeline includes:
+- Medical cases
+- Reports associated with each case
+- Doctor notes associated with those reports
+
+Medical cases are returned in descending order of creation date.
+
+### Flow
+
+Patient JWT  
+→ Verify Patient  
+→ Fetch Patient's Medical Cases  
+→ Fetch Reports for Each Case  
+→ Fetch Doctor Notes for Those Reports  
+→ Return Timeline
+
+### Example Response
+
+```json
+{
+  "message": "Timeline fetched successfully",
+  "timeline": [
+    {
+      "medicalCase": {},
+      "reports": [],
+      "doctorNotes": []
+    }
+  ]
+}
+```

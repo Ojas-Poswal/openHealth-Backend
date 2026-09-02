@@ -1,5 +1,7 @@
 import MedicalCase from "../models/medicalCase.model.js";
 import Patient from "../models/patient.model.js";
+import Report from "../models/report.model.js";
+import DoctorNote from "../models/doctorNote.model.js";
 
 const createMedicalCase = async (req,res) => {
     try{
@@ -122,4 +124,38 @@ const updateCaseStatus = async (req,res) => {
     }
 }
 
-export {createMedicalCase,getMyMedicalCases,getMedicalCaseByID,updateCaseStatus}
+const getMyTimeline = async (req,res) => {
+    try{
+        const patientId = req.patient.patientID;
+
+        const medicalCases = await MedicalCase.find({
+            patientId
+        }).sort({createdAt : -1});
+
+        const timeline = await Promise.all(
+            medicalCases.map(async (medicalCase) => {
+                const reports = await Report.find({
+                    medicalCaseId : medicalCase._id,
+                })
+
+                const doctorNotes = await DoctorNote.find({
+                    reportId : { $in : reports.map(report => report._id)}
+                })
+
+                return {medicalCase,reports,doctorNotes};
+            }) 
+        )
+
+        return res.status(200).json({
+            message : "Timeline fetched successfully",
+            timeline
+        })
+
+    }catch(error){
+        console.error(error);
+        return res.status(500).json({
+            message : "Internal Server Error"
+        })
+    }
+}
+export {createMedicalCase,getMyMedicalCases,getMedicalCaseByID,updateCaseStatus,getMyTimeline}
