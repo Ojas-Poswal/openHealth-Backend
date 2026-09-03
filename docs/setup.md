@@ -1986,3 +1986,51 @@ Patient JWT
   ]
 }
 ```
+
+## Get Active Medical Cases API
+
+### Endpoint
+
+**GET** `/api/v1/medical-cases/active-cases`
+
+### Authentication
+
+Requires a valid Patient JWT.
+
+```text
+Authorization: Bearer <patient-token>
+```
+
+### Description
+
+Fetches all active medical cases belonging to the authenticated patient.
+
+### Security
+
+- Valid Patient JWT required
+- Only returns cases owned by the authenticated patient
+
+### Flow
+
+Patient JWT
+
+→ Verify Patient
+
+→ Find Medical Cases
+
+→ Filter Status = "active"
+
+→ Return Active Cases
+
+### Example Response
+
+```json
+{
+  "message": "Active cases fetched successfully",
+  "activeCases": []
+}
+```
+
+### Outcome
+
+Allows patients to quickly view ongoing medical conditions and supports dashboard statistics, timeline filtering, doctor portal access, and laboratory workflows.

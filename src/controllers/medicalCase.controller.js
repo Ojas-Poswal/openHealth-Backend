@@ -158,4 +158,22 @@ const getMyTimeline = async (req,res) => {
         })
     }
 }
-export {createMedicalCase,getMyMedicalCases,getMedicalCaseByID,updateCaseStatus,getMyTimeline}
+
+const getActiveCases = async (req,res) => {
+    try{
+       const activeCases = await MedicalCase.find({
+        patientId : req.patient.patientID,
+        status : "active"
+    });
+        return res.status(200).json({
+            message : "Active cases fetched successfully",
+            activeCases
+        })
+    }catch(error){
+        console.log(error);
+        return res.status(500).json({
+            message : "Internal server error"
+        })
+    }
+}
+export {createMedicalCase,getMyMedicalCases,getMedicalCaseByID,updateCaseStatus,getMyTimeline,getActiveCases}

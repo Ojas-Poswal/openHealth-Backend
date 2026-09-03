@@ -616,3 +616,75 @@ Removed the invalid method call and used direct bcrypt password comparison.
 ## Lesson
 
 Maintain a consistent password validation strategy across authentication modules.
+
+## Bug
+
+### Error
+
+```text
+CastError: Cast to ObjectId failed for value "active-cases"
+```
+
+### Cause
+
+The parameterized route:
+
+```js
+router.get("/:caseId", verifyPatient, getMedicalCaseByID)
+```
+
+was declared before the specific route:
+
+```js
+router.get("/active-cases", verifyPatient, getActiveCases)
+```
+
+As a result, Express interpreted:
+
+```text
+/active-cases
+```
+
+as:
+
+```js
+caseId = "active-cases"
+```
+
+and attempted:
+
+```js
+MedicalCase.findById("active-cases")
+```
+
+which caused a MongoDB CastError.
+
+### Fix
+
+Move all specific routes above parameterized routes.
+
+Correct:
+
+```js
+router.get("/my-cases", verifyPatient, getMyMedicalCases)
+
+router.get("/timeline", verifyPatient, getMyTimeline)
+
+router.get("/active-cases", verifyPatient, getActiveCases)
+
+router.get("/:caseId", verifyPatient, getMedicalCaseByID)
+```
+
+### Lesson
+
+In Express, route order matters.
+
+Always place specific routes before dynamic parameter routes such as:
+
+```js
+/:id
+/:caseId
+/:reportId
+```
+
+to prevent unintended route matching.
