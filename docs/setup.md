@@ -2083,3 +2083,57 @@ Patient JWT
 
 Allows patients to quickly view completed or closed medical cases, improving timeline organization and supporting future analytics and reporting features.
 ```
+
+## Search Patient By OHID API
+
+### Endpoint
+
+**GET** `/api/v1/doctors/search/:ohid`
+
+### Authentication
+
+Requires a valid Doctor JWT.
+
+```text
+Authorization: Bearer <doctor-token>
+```
+
+### Description
+
+Allows an authenticated doctor to search for a patient using their OpenHealth ID (OHID).
+
+### Security
+
+- Valid Doctor JWT required
+- Patient must exist in the system
+
+### Flow
+
+Doctor JWT
+
+→ Verify Doctor
+
+→ Extract OHID from URL
+
+→ Find Patient by OHID
+
+→ Return Patient Details
+
+### Example Request
+
+```http
+GET /api/v1/doctors/search/OH-180cc7c5-98ef-4665-a8d7-d66483c3ae4b
+```
+
+### Example Response
+
+```json
+{
+  "message": "Patient found",
+  "patient": {}
+}
+```
+
+### Outcome
+
+Provides the foundation for the Doctor Portal, enabling doctors to locate patients before accessing timelines, reports, notes, prescriptions, and future consent-based medical records.

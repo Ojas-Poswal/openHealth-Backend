@@ -2,6 +2,7 @@ import Doctor from "../models/doctor.model.js"
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 import crypto from "crypto";
+import Patient from "../models/patient.model.js";
 
 const registerDoctor = async (req,res)=>{
    try {
@@ -209,4 +210,28 @@ const updateProfile = async (req,res) => {
   }
 }
 
-export {registerDoctor,loginDoctor,getDoctorProfile,changePassword,updateProfile}
+const searchPatientByOHID = async (req,res) => {
+    console.log("SEARCH HIT");
+    try{
+      const {ohid} = req.params;
+
+      const patient = await Patient.findOne({ohid})
+
+      if(!patient){
+        return res.status(404).json({
+            message : "Patient Not Found"
+        })
+      }
+      return res.status(200).json({
+        message : "Patient Fetched Successfully",
+        patient
+      })
+    }catch(error){
+        console.log(error);
+        return res.status(500).json({
+            message : "Internal Server Error"
+        })
+    }
+}
+
+export {registerDoctor,loginDoctor,getDoctorProfile,changePassword,updateProfile,searchPatientByOHID}
