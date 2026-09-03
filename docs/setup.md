@@ -2034,3 +2034,52 @@ Patient JWT
 ### Outcome
 
 Allows patients to quickly view ongoing medical conditions and supports dashboard statistics, timeline filtering, doctor portal access, and laboratory workflows.
+
+## Get Resolved Medical Cases API
+
+### Endpoint
+
+**GET** `/api/v1/medical-cases/resolved-cases`
+
+### Authentication
+
+Requires a valid Patient JWT.
+
+```text
+Authorization: Bearer <patient-token>
+```
+
+### Description
+
+Fetches all resolved medical cases belonging to the authenticated patient.
+
+### Security
+
+- Valid Patient JWT required
+- Only returns cases owned by the authenticated patient
+
+### Flow
+
+Patient JWT
+
+→ Verify Patient
+
+→ Find Medical Cases
+
+→ Filter Status = "resolved"
+
+→ Return Resolved Cases
+
+### Example Response
+
+```json
+{
+  "message": "Resolved cases fetched successfully",
+  "resolvedCases": []
+}
+```
+
+### Outcome
+
+Allows patients to quickly view completed or closed medical cases, improving timeline organization and supporting future analytics and reporting features.
+```
