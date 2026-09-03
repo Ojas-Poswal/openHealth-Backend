@@ -2137,3 +2137,75 @@ GET /api/v1/doctors/search/OH-180cc7c5-98ef-4665-a8d7-d66483c3ae4b
 ### Outcome
 
 Provides the foundation for the Doctor Portal, enabling doctors to locate patients before accessing timelines, reports, notes, prescriptions, and future consent-based medical records.
+
+## Doctor View Patient Timeline API
+
+### Endpoint
+
+**GET** `/api/v1/doctors/patient/:patientId/timeline`
+
+### Authentication
+
+Requires a valid Doctor JWT.
+
+```text
+Authorization: Bearer <doctor-token>
+```
+
+### Description
+
+Allows an authenticated doctor to view a patient's complete medical timeline.
+
+The timeline includes:
+
+- Medical Cases
+- Reports
+- Doctor Notes
+
+Medical cases are returned in descending order of creation date.
+
+### Security
+
+- Valid Doctor JWT required
+- Patient must exist in the system
+
+### Flow
+
+Doctor JWT
+
+→ Verify Doctor
+
+→ Find Patient
+
+→ Fetch Medical Cases
+
+→ Fetch Reports
+
+→ Fetch Doctor Notes
+
+→ Return Timeline
+
+### Example Request
+
+```http
+GET /api/v1/doctors/patient/6a7ca25442baf19c0f84f42f/timeline
+```
+
+### Example Response
+
+```json
+{
+  "message": "Timeline fetched successfully",
+  "timeline": [
+    {
+      "medicalCase": {},
+      "reports": [],
+      "doctorNotes": []
+    }
+  ]
+}
+```
+
+### Outcome
+
+Provides doctors with a complete view of a patient's medical history, reports, and observations, forming the foundation of the Doctor Portal.

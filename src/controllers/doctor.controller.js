@@ -3,6 +3,9 @@ import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 import crypto from "crypto";
 import Patient from "../models/patient.model.js";
+import MedicalCase from "../models/medicalCase.model.js";
+import Report from "../models/report.model.js";
+import DoctorNote from "../models/doctorNote.model.js";
 
 const registerDoctor = async (req,res)=>{
    try {
@@ -234,4 +237,48 @@ const searchPatientByOHID = async (req,res) => {
     }
 }
 
-export {registerDoctor,loginDoctor,getDoctorProfile,changePassword,updateProfile,searchPatientByOHID}
+const getPatientTimeline = async (req,res) => {
+   try{
+           const { patientId } = req.params;
+
+            const patient = await Patient.findById(patientId);
+
+             if (!patient) {
+                 return res.status(404).json({
+                 message: "Patient not found",
+                 });
+             }
+   
+           const medicalCases = await MedicalCase.find({
+               patientId
+           }).sort({createdAt : -1});
+
+            
+   
+           const timeline = await Promise.all(
+               medicalCases.map(async (medicalCase) => {
+                   const reports = await Report.find({
+                       medicalCaseId : medicalCase._id,
+                   })
+   
+                   const doctorNotes = await DoctorNote.find({
+                       reportId : { $in : reports.map(report => report._id)}
+                   })
+   
+                   return {medicalCase,reports,doctorNotes};
+               }) 
+           )
+   
+           return res.status(200).json({
+               message : "Timeline fetched successfully",
+               timeline
+           })
+   
+       }catch(error){
+           console.error(error);
+           return res.status(500).json({
+               message : "Internal Server Error"
+           })
+       }
+}
+export {registerDoctor,loginDoctor,getDoctorProfile,changePassword,updateProfile,searchPatientByOHID,getPatientTimeline}
