@@ -2209,3 +2209,141 @@ GET /api/v1/doctors/patient/6a7ca25442baf19c0f84f42f/timeline
 ### Outcome
 
 Provides doctors with a complete view of a patient's medical history, reports, and observations, forming the foundation of the Doctor Portal.
+
+## Prescription Model
+
+### Purpose
+
+Stores doctor prescriptions linked to a patient's medical case.
+
+### Relationship
+
+Patient
+
+↓
+
+Medical Case
+
+↓
+
+Prescription
+
+### Fields
+
+- patientId
+- doctorId
+- medicalCaseId
+- medicines
+
+Medicine Object:
+
+- medicine
+- dosage
+- frequency
+- duration
+- notes
+
+### Design Decision
+
+Each prescription is stored as a separate document.
+
+When a doctor writes a new prescription, a new Prescription document is created instead of updating the previous one.
+
+Benefits:
+
+- Preserves prescription history
+- Supports multiple follow-up visits
+- Enables timeline-based viewing
+- Maintains complete treatment records
+
+### Example Structure
+
+```json
+{
+  "patientId": "...",
+  "doctorId": "...",
+  "medicalCaseId": "...",
+  "medicines": [
+    {
+      "medicine": "Paracetamol",
+      "dosage": "500mg",
+      "frequency": "Twice Daily",
+      "duration": "5 Days",
+      "notes": "After meals"
+    }
+  ]
+}
+```
+
+## Create Prescription API
+
+### Endpoint
+
+POST /api/v1/prescriptions/create
+
+### Authentication
+
+Requires a valid Doctor JWT.
+
+### Purpose
+
+Allows doctors to create prescriptions for a patient's medical case.
+
+### Flow
+
+Doctor JWT
+
+↓
+
+Verify Doctor
+
+↓
+
+Find Medical Case
+
+↓
+
+Extract Patient ID
+
+↓
+
+Create Prescription
+
+↓
+
+MongoDB
+
+↓
+
+Success Response
+
+### Request Body
+
+```json
+{
+  "medicalCaseId": "MEDICAL_CASE_ID",
+  "medicines": [
+    {
+      "medicine": "Paracetamol",
+      "dosage": "500mg",
+      "frequency": "Twice Daily",
+      "duration": "5 Days",
+      "notes": "After meals"
+    }
+  ]
+}
+```
+
+### Security
+
+- Valid Doctor JWT required
+- Medical Case must exist
+
+### Metadata
+
+- doctorId is automatically extracted from authenticated doctor
+- patientId is automatically extracted from the linked medical case
+
+### Outcome
+
+Doctors can create structured prescriptions linked directly to a patient's medical case while preserving complete prescription history.
