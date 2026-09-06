@@ -6,6 +6,8 @@ import Patient from "../models/patient.model.js";
 import MedicalCase from "../models/medicalCase.model.js";
 import Report from "../models/report.model.js";
 import DoctorNote from "../models/doctorNote.model.js";
+import Consent from "../models/consent.model.js";
+
 
 const registerDoctor = async (req,res)=>{
    try {
@@ -285,4 +287,47 @@ const getPatientTimeline = async (req,res) => {
            })
        }
 }
-export {registerDoctor,loginDoctor,getDoctorProfile,changePassword,updateProfile,searchPatientByOHID,getPatientTimeline}
+
+const requestConsent = async (req, res) => {
+  try {
+    const { patientId } = req.body;
+
+    const patient = await Patient.findById(patientId);
+
+    if (!patient) {
+      return res.status(404).json({
+        message: "Patient Not Found",
+      });
+    }
+
+    const otp = Math.floor(
+      100000 + Math.random() * 900000
+    ).toString();
+
+    const expiresAt = new Date(
+      Date.now() + 10 * 60 * 1000
+    );
+
+    await Consent.create({
+      patientId,
+      doctorId: req.doctor._id,
+      otp,
+      expiresAt,
+    });
+
+    return res.status(201).json({
+      message: "Consent OTP Generated",
+      doctorName: req.doctor.fullName,
+      dhid: req.doctor.dhid,
+      otp,
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};
+export {registerDoctor,loginDoctor,getDoctorProfile,changePassword,updateProfile,searchPatientByOHID,getPatientTimeline,requestConsent}

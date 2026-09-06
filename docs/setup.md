@@ -2430,3 +2430,83 @@ Unified Timeline Response
 ### Outcome
 
 Every prescription created by a doctor becomes part of the patient's medical timeline and is visible through timeline APIs.
+
+## Doctor Request Consent API
+
+### Endpoint
+
+POST /api/v1/doctors/request-consent
+
+### Authentication
+
+Requires a valid Doctor JWT.
+
+### Purpose
+
+Allows a doctor to request access to a patient's medical timeline.
+
+### Flow
+
+Doctor JWT
+
+↓
+
+Verify Doctor
+
+↓
+
+Find Patient
+
+↓
+
+Generate OTP
+
+↓
+
+Create Consent Record
+
+↓
+
+Store OTP with Expiry
+
+↓
+
+Success Response
+
+### Request Body
+
+```json
+{
+  "patientId": "PATIENT_ID"
+}
+```
+
+### Consent Fields
+
+- patientId
+- doctorId
+- otp
+- expiresAt
+- isUsed
+
+### Security
+
+- Valid Doctor JWT required
+- Patient must exist
+- OTP expires after 10 minutes
+- OTP can only be used once
+
+### Response
+
+```json
+{
+  "message": "Consent OTP Generated",
+  "doctorName": "Dr. John Doe",
+  "dhid": "DHID123",
+  "otp": "123456"
+}
+```
+
+### Outcome
+
+Doctors can initiate access requests for patient timelines. The generated OTP acts as the patient's approval mechanism before timeline access is granted.
