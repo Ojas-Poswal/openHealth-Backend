@@ -2685,3 +2685,43 @@ Audit Log Created
 ### Outcome
 
 Every access request, approval, timeline view, and session termination is permanently recorded in the system.
+
+## Patient Audit Logs API
+
+### Endpoint
+
+GET /api/v1/patients/audit-logs
+
+### Authentication
+
+Requires a valid Patient JWT.
+
+### Purpose
+
+Allows patients to view a history of doctor interactions with their medical records.
+
+### Data Returned
+
+- doctorId
+- doctor name
+- doctor DHID
+- action
+- timestamp
+
+### Actions
+
+- CONSENT_REQUESTED
+- CONSENT_VERIFIED
+- TIMELINE_VIEWED
+- SESSION_ENDED
+
+### Security Benefits
+
+- Transparency
+- Accountability
+- Access Monitoring
+- Patient Awareness
+
+### Outcome
+
+Patients can view a complete history of who accessed their medical records and when the access occurred.

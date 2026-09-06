@@ -1,6 +1,7 @@
 import Patient from "../models/patient.model.js"
 import bcrypt from "bcrypt"
-import jwt from "jsonwebtoken" 
+import jwt from "jsonwebtoken"
+import AuditLog from "../models/auditLog.model.js" 
 
 
 const registerPatient = async (req,res)=>{
@@ -249,4 +250,27 @@ const resetPassword = async (req,res) => {
     });
 }
 
-export {registerPatient,loginPatient,getPatientProfile,updatePatientProfile,changePassword,forgotPassword,verifyOtp,resetPassword}
+const getMyAuditLogs = async (req,res) => {
+  try {
+
+    const logs = await AuditLog.find({
+      patientId: req.patient.patientID
+    })
+    .populate("doctorId", "fullName dhid")
+    .sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      message: "Audit logs fetched successfully",
+      logs
+    });
+
+  } catch(error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Internal Server Error"
+    });
+  }
+}
+
+export {registerPatient,loginPatient,getPatientProfile,updatePatientProfile,changePassword,forgotPassword,verifyOtp,resetPassword,getMyAuditLogs}
