@@ -2347,3 +2347,86 @@ Success Response
 ### Outcome
 
 Doctors can create structured prescriptions linked directly to a patient's medical case while preserving complete prescription history.
+
+## Prescriptions in Timeline
+
+### Purpose
+
+Integrate prescriptions directly into the patient timeline.
+
+### Design
+
+The timeline acts as the single source of truth for patient history.
+
+Timeline now contains:
+
+- Medical Cases
+- Reports
+- Doctor Notes
+- Prescriptions
+
+### Patient Timeline
+
+Updated timeline response:
+
+```js
+{
+  medicalCase,
+  reports,
+  doctorNotes,
+  prescriptions
+}
+```
+
+### Doctor Timeline
+
+Updated timeline response:
+
+```js
+{
+  medicalCase,
+  reports,
+  doctorNotes,
+  prescriptions
+}
+```
+
+### Flow
+
+Patient / Doctor
+
+↓
+
+Timeline API
+
+↓
+
+Medical Cases
+
+↓
+
+Reports
+
+↓
+
+Doctor Notes
+
+↓
+
+Prescriptions
+
+↓
+
+Unified Timeline Response
+
+### Benefits
+
+- No separate prescription viewing screen required
+- Prescriptions automatically appear in medical history
+- Patient and doctor see the same timeline data
+- Supports future OTP-based doctor access model
+- Keeps all medical records in a single chronological view
+
+### Outcome
+
+Every prescription created by a doctor becomes part of the patient's medical timeline and is visible through timeline APIs.

@@ -2,6 +2,7 @@ import MedicalCase from "../models/medicalCase.model.js";
 import Patient from "../models/patient.model.js";
 import Report from "../models/report.model.js";
 import DoctorNote from "../models/doctorNote.model.js";
+import Prescription from "../models/prescription.model.js";
 
 const createMedicalCase = async (req,res) => {
     try{
@@ -142,7 +143,11 @@ const getMyTimeline = async (req,res) => {
                     reportId : { $in : reports.map(report => report._id)}
                 })
 
-                return {medicalCase,reports,doctorNotes};
+                const prescriptions = await Prescription.find({
+                    medicalCaseId : medicalCase._id
+                }).sort({createdAt : -1})
+
+                return {medicalCase,reports,doctorNotes,prescriptions};
             }) 
         )
 

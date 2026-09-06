@@ -264,8 +264,12 @@ const getPatientTimeline = async (req,res) => {
                    const doctorNotes = await DoctorNote.find({
                        reportId : { $in : reports.map(report => report._id)}
                    })
+
+                   const prescriptions = await Prescription.find({
+                       medicalCaseId: medicalCase._id
+                    }).sort({ createdAt: -1 });
    
-                   return {medicalCase,reports,doctorNotes};
+                   return {medicalCase,reports,doctorNotes,prescriptions};
                }) 
            )
    
