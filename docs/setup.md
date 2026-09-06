@@ -2636,3 +2636,52 @@ Success Response
 ### Outcome
 
 Patient timeline access becomes unavailable until a new OTP is requested and verified.
+
+## Audit Log System
+
+### Purpose
+
+Tracks all sensitive doctor interactions with patient medical records.
+
+### Actions Logged
+
+- CONSENT_REQUESTED
+- CONSENT_VERIFIED
+- TIMELINE_VIEWED
+- SESSION_ENDED
+
+### Audit Log Fields
+
+- patientId
+- doctorId
+- action
+- createdAt
+
+### Flow
+
+Doctor Requests Consent
+↓
+Audit Log Created
+
+Doctor Verifies Consent
+↓
+Audit Log Created
+
+Doctor Views Timeline
+↓
+Audit Log Created
+
+Doctor Ends Session
+↓
+Audit Log Created
+
+### Security Benefits
+
+- Creates an access history for every patient
+- Improves transparency
+- Supports compliance and auditing
+- Enables future patient-facing access history
+
+### Outcome
+
+Every access request, approval, timeline view, and session termination is permanently recorded in the system.

@@ -7,6 +7,7 @@ import MedicalCase from "../models/medicalCase.model.js";
 import Report from "../models/report.model.js";
 import DoctorNote from "../models/doctorNote.model.js";
 import Consent from "../models/consent.model.js";
+import AuditLog from "../models/auditLog.model.js";
 
 
 const registerDoctor = async (req,res)=>{
@@ -287,6 +288,12 @@ const getPatientTimeline = async (req,res) => {
                    return {medicalCase,reports,doctorNotes,prescriptions};
                }) 
            )
+
+           await AuditLog.create({
+            patientId,
+            doctorId: req.doctor._id,
+            action: "TIMELINE_VIEWED",
+           });
    
            return res.status(200).json({
                message : "Timeline fetched successfully",
@@ -328,6 +335,11 @@ const requestConsent = async (req, res) => {
       expiresAt,
     });
 
+     await AuditLog.create({
+        patientId,
+        doctorId: req.doctor._id,
+        action: "CONSENT_REQUESTED",
+     })
     return res.status(201).json({
       message: "Consent OTP Generated",
       doctorName: req.doctor.fullName,
@@ -371,6 +383,12 @@ const verifyConsent = async (req,res) => {
       consent.accessGranted = true;
       await consent.save();
 
+      await AuditLog.create({
+       patientId,
+       doctorId: req.doctor._id,
+       action: "CONSENT_GRANTED",
+     });
+
       return res.status(200).json({
         message: "Consent Verified Successfully"
       });
@@ -401,6 +419,12 @@ const endSession = async (req,res) => {
         }
         consent.accessGranted = false;
         await consent.save();
+
+        await AuditLog.create({
+         patientId,
+         doctorId: req.doctor._id,
+         action: "SESSION_ENDED",
+        });
 
         return res.status(200).json({
             message : "Session Ended Successfully"
