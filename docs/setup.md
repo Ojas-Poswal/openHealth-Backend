@@ -2578,3 +2578,61 @@ Success Response
 ### Outcome
 
 Doctors can securely verify patient consent before accessing sensitive medical timelines.
+
+
+## Doctor End Session API
+
+### Endpoint
+
+POST /api/v1/doctors/end-session
+
+### Authentication
+
+Requires a valid Doctor JWT.
+
+### Purpose
+
+Revokes a doctor's temporary access to a patient's timeline after consultation is completed.
+
+### Flow
+
+Doctor JWT
+
+↓
+
+Verify Doctor
+
+↓
+
+Find Active Consent
+
+↓
+
+Revoke Access
+
+↓
+
+Save Consent
+
+↓
+
+Success Response
+
+### Request Body
+
+```json
+{
+  "patientId": "PATIENT_ID"
+}
+```
+
+### Security
+
+- Valid Doctor JWT required
+- Doctor can only end their own session
+- Requires an active consent session
+- Timeline access is revoked immediately
+
+### Outcome
+
+Patient timeline access becomes unavailable until a new OTP is requested and verified.

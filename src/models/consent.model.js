@@ -23,6 +23,10 @@ const consentSchema = new mongoose.Schema(
         isUsed:{
             type : Boolean,
             default : false
+        },
+        accessGranted:{
+            type: Boolean,
+            default : false
         }
     },
     {

@@ -728,3 +728,44 @@ return res.status(200).json({
 ### Lesson
 
 Every execution path inside an Express controller should return a response.
+
+
+## Bug
+
+### Error
+
+Doctors retained timeline access indefinitely after a single OTP verification.
+
+### Cause
+
+Consent verification marked the OTP as used but did not implement a mechanism to revoke timeline access after the consultation ended.
+
+```js
+consent.isUsed = true;
+await consent.save();
+```
+
+As a result, any consent record with `isUsed: true` permanently granted access.
+
+### Fix
+
+Introduced session-based access control using an `accessGranted` field.
+
+```js
+consent.isUsed = true;
+consent.accessGranted = true;
+
+await consent.save();
+```
+
+Added an `end-session` API to revoke access:
+
+```js
+consent.accessGranted = false;
+
+await consent.save();
+```
+
+### Lesson
+
+Temporary authorization should always have an explicit revocation mechanism. Authentication and authorization flows must define both how access is granted and how it is removed.

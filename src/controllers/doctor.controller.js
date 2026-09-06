@@ -250,6 +250,19 @@ const getPatientTimeline = async (req,res) => {
                  message: "Patient not found",
                  });
              }
+
+             const consent = await Consent.findOne({
+                patientId,
+                doctorId: req.doctor._id,
+                isUsed: true,
+                accessGranted: true,
+             })
+
+             if(!consent){
+                return res.status(403).json({
+                    message : "Access Denied"
+                })
+             }
    
            const medicalCases = await MedicalCase.find({
                patientId
@@ -355,7 +368,7 @@ const verifyConsent = async (req,res) => {
       }
 
       consent.isUsed = true;
-
+      consent.accessGranted = true;
       await consent.save();
 
       return res.status(200).json({
@@ -370,4 +383,33 @@ const verifyConsent = async (req,res) => {
         })
     }
 }
-export {registerDoctor,loginDoctor,getDoctorProfile,changePassword,updateProfile,searchPatientByOHID,getPatientTimeline,requestConsent,verifyConsent}
+
+const endSession = async (req,res) => {
+    try{
+        const {patientId} = req.body;
+
+        const consent = await Consent.findOne({
+            patientId,
+            doctorId : req.doctor._id,
+            accessGranted : true
+        })
+
+        if(!consent){
+            return res.status(404).json({
+                message : "No active session found"
+            })
+        }
+        consent.accessGranted = false;
+        await consent.save();
+
+        return res.status(200).json({
+            message : "Session Ended Successfully"
+        })
+    }catch(error){
+        console.error(error);
+        return res.status(500).json({
+            message : "Internal Server Error"
+        })
+    }
+}
+export {registerDoctor,loginDoctor,getDoctorProfile,changePassword,updateProfile,searchPatientByOHID,getPatientTimeline,requestConsent,verifyConsent,endSession}
