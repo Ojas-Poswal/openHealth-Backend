@@ -769,3 +769,75 @@ await consent.save();
 ### Lesson
 
 Temporary authorization should always have an explicit revocation mechanism. Authentication and authorization flows must define both how access is granted and how it is removed.
+
+## Bug
+
+### Error
+
+```text
+Must supply api_key
+```
+
+### Cause
+
+Cloudinary was initialized before environment variables were loaded.
+
+`cloudinary.js` accessed:
+
+```js
+process.env.CLOUDINARY_CLOUD_NAME
+process.env.CLOUDINARY_API_KEY
+process.env.CLOUDINARY_API_SECRET
+```
+
+before `dotenv.config()` had executed.
+
+With ES Modules, imports are evaluated before the rest of the file executes.
+
+Example:
+
+```js
+import app from "./app.js";
+import dotenv from "dotenv";
+
+dotenv.config();
+```
+
+Even though `dotenv.config()` appears near the top, `app.js` and its dependency tree are loaded first.
+
+If `cloudinary.js` is imported anywhere inside that chain, Cloudinary receives:
+
+```js
+undefined
+undefined
+undefined
+```
+
+for its credentials.
+
+### Fix
+
+Load dotenv inside `cloudinary.js` before reading environment variables.
+
+```js
+import dotenv from "dotenv";
+dotenv.config();
+
+import { v2 as cloudinary } from "cloudinary";
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+export default cloudinary;
+```
+
+### Lesson
+
+With ES Modules, imported files execute before the remaining code in the importing file.
+
+When a configuration file depends on environment variables, ensure the variables are loaded before accessing them.
+
+For critical configuration modules such as Cloudinary, explicitly loading dotenv inside the configuration file prevents initialization-order issues.

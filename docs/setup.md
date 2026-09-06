@@ -2782,3 +2782,149 @@ Success Response
 ### Outcome
 
 Patients maintain full control over who can access their medical history.
+
+## Report Upload System (Cloudinary)
+
+### Purpose
+
+Allows patients to upload medical reports directly to OpenHealth.
+
+Supported file types:
+
+- PDF
+- JPG
+- JPEG
+- PNG
+
+Uploaded files are stored in Cloudinary and linked to a medical case.
+
+### Architecture
+
+Patient
+
+↓
+
+Upload Report
+
+↓
+
+Cloudinary
+
+↓
+
+File URL Generated
+
+↓
+
+MongoDB Report Document Created
+
+↓
+
+Visible in Timeline
+
+### Dependencies
+
+```bash
+npm install cloudinary multer multer-storage-cloudinary
+```
+
+### Environment Variables
+
+```env
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+```
+
+### Cloudinary Configuration
+
+Cloudinary is configured through:
+
+```txt
+src/config/cloudinary.js
+```
+
+### Upload Middleware
+
+Uses:
+
+- multer
+- multer-storage-cloudinary
+
+Middleware:
+
+```txt
+upload.single("file")
+```
+
+### Endpoint
+
+POST /api/v1/reports/create
+
+### Authentication
+
+Requires a valid Patient JWT.
+
+### Content Type
+
+```txt
+multipart/form-data
+```
+
+### Request Body
+
+| Field | Type |
+|---------|---------|
+| medicalCaseId | Text |
+| reportName | Text |
+| reportType | Text |
+| file | File |
+
+### Flow
+
+Patient JWT
+
+↓
+
+Verify Patient
+
+↓
+
+Verify Medical Case
+
+↓
+
+Upload File To Cloudinary
+
+↓
+
+Generate File URL
+
+↓
+
+Create Report Document
+
+↓
+
+Success Response
+
+### Report Fields Stored
+
+- medicalCaseId
+- reportName
+- reportType
+- fileUrl
+- fileType
+- uploadedByType
+- uploadedById
+
+### Security
+
+- Valid Patient JWT required
+- Patient must own the medical case
+- Only supported file types allowed
+- Files stored outside application server
+
+### Outcome
+
+Patients can upload medical reports directly to OpenHealth and access them later through their medical timeline.

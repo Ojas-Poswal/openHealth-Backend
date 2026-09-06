@@ -4,7 +4,7 @@ import MedicalCase from "../models/medicalCase.model.js";
 
 const createReport = async (req,res) => {
     try{
-       const {medicalCaseId,reportName,reportType,fileUrl,fileType} = req.body
+       const {medicalCaseId,reportName,reportType} = req.body
 
        const medicalCase = await MedicalCase.findById(medicalCaseId);
 
@@ -19,12 +19,21 @@ const createReport = async (req,res) => {
         })
        }
 
+       if (!req.file) {
+        return res.status(400).json({
+        message: "File is required",
+        });
+      }
+
        const report = await Report.create({
         medicalCaseId,
         reportName,
         reportType,
-        fileUrl,
-        fileType,
+        fileUrl: req.file.path,
+        fileType: req.file.originalname
+           .split(".")
+           .pop()
+           .toLowerCase(),
         uploadedByType: "Patient",
         uploadedById: req.patient.patientID
        })
