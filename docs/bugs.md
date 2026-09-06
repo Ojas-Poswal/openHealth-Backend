@@ -688,3 +688,43 @@ Always place specific routes before dynamic parameter routes such as:
 ```
 
 to prevent unintended route matching.
+
+## Bug
+
+### Error
+
+Request remained in loading state indefinitely.
+
+### Cause
+
+The success path did not send any response back to the client.
+
+Incorrect:
+
+```js
+if(consent.expiresAt < Date.now()){
+    return res.status(400).json({
+        message: "OTP Expired"
+    });
+}
+```
+
+Execution reached the end of the function without returning a response.
+
+### Fix
+
+Added success handling.
+
+```js
+consent.isUsed = true;
+
+await consent.save();
+
+return res.status(200).json({
+    message: "Consent Verified Successfully"
+});
+```
+
+### Lesson
+
+Every execution path inside an Express controller should return a response.

@@ -2510,3 +2510,71 @@ Success Response
 ### Outcome
 
 Doctors can initiate access requests for patient timelines. The generated OTP acts as the patient's approval mechanism before timeline access is granted.
+
+## Doctor Verify Consent API
+
+### Endpoint
+
+POST /api/v1/doctors/verify-consent
+
+### Authentication
+
+Requires a valid Doctor JWT.
+
+### Purpose
+
+Allows doctors to verify a patient-provided OTP and gain authorized access to the patient's timeline.
+
+### Flow
+
+Doctor JWT
+
+↓
+
+Verify Doctor
+
+↓
+
+Find Consent Record
+
+↓
+
+Validate OTP
+
+↓
+
+Check Expiry
+
+↓
+
+Mark Consent As Used
+
+↓
+
+Grant Access
+
+↓
+
+Success Response
+
+### Request Body
+
+```json
+{
+  "patientId": "PATIENT_ID",
+  "otp": "123456"
+}
+```
+
+### Security
+
+- Valid Doctor JWT required
+- OTP must match
+- OTP must belong to the requesting doctor
+- OTP must belong to the selected patient
+- OTP expires after 10 minutes
+- OTP can only be used once
+
+### Outcome
+
+Doctors can securely verify patient consent before accessing sensitive medical timelines.

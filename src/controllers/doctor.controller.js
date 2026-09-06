@@ -330,4 +330,44 @@ const requestConsent = async (req, res) => {
     });
   }
 };
-export {registerDoctor,loginDoctor,getDoctorProfile,changePassword,updateProfile,searchPatientByOHID,getPatientTimeline,requestConsent}
+
+const verifyConsent = async (req,res) => {
+    try{
+      const {patientId,otp} = req.body;
+
+      const consent = await Consent.findOne({
+        patientId,
+        doctorId : req.doctor._id,
+        otp,
+        isUsed : false,
+      });
+
+      if(!consent){
+        return res.status(404).json({
+            message : "Invalid OTP"
+        })
+      }
+
+      if(consent.expiresAt < Date.now()){
+        return res.status(400).json({
+            message : "OTP Expired"
+        })
+      }
+
+      consent.isUsed = true;
+
+      await consent.save();
+
+      return res.status(200).json({
+        message: "Consent Verified Successfully"
+      });
+
+
+    }catch(error){
+        console.error(error);
+        return res.status(500).json({
+            message : "Internal Server Error"
+        })
+    }
+}
+export {registerDoctor,loginDoctor,getDoctorProfile,changePassword,updateProfile,searchPatientByOHID,getPatientTimeline,requestConsent,verifyConsent}
