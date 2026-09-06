@@ -1,5 +1,5 @@
 import {Router} from "express"
-import { registerPatient,loginPatient,getPatientProfile,updatePatientProfile,changePassword,forgotPassword,verifyOtp,resetPassword,getMyAuditLogs} from "../controllers/patient.controller.js"
+import { registerPatient,loginPatient,getPatientProfile,updatePatientProfile,changePassword,forgotPassword,verifyOtp,resetPassword,getMyAuditLogs,revokeConsent} from "../controllers/patient.controller.js"
 import verifyJWT from "../middlewares/auth.middleware.js"
 
 
@@ -14,5 +14,6 @@ router.post("/forgot-password",forgotPassword)
 router.post( "/verify-otp",verifyOtp);
 router.post("/reset-password",resetPassword);
 router.get("/audit-logs",verifyJWT,getMyAuditLogs)
+router.post("/revoke-consent",verifyJWT,revokeConsent)
 
 export default router

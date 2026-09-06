@@ -2725,3 +2725,60 @@ Allows patients to view a history of doctor interactions with their medical reco
 ### Outcome
 
 Patients can view a complete history of who accessed their medical records and when the access occurred.
+
+## Patient Revoke Consent API
+
+### Endpoint
+
+POST /api/v1/patients/revoke-consent
+
+### Authentication
+
+Requires a valid Patient JWT.
+
+### Purpose
+
+Allows patients to immediately revoke a doctor's active access to their medical timeline.
+
+### Flow
+
+Patient JWT
+
+↓
+
+Verify Patient
+
+↓
+
+Find Active Consent
+
+↓
+
+Revoke Access
+
+↓
+
+Save Consent
+
+↓
+
+Success Response
+
+### Request Body
+
+```json
+{
+  "doctorId": "DOCTOR_ID"
+}
+```
+
+### Security
+
+- Valid Patient JWT required
+- Patient can only revoke access to their own records
+- Doctor access is removed immediately
+- New OTP verification is required for future access
+
+### Outcome
+
+Patients maintain full control over who can access their medical history.

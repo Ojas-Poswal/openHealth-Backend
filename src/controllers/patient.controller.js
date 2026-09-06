@@ -2,6 +2,7 @@ import Patient from "../models/patient.model.js"
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 import AuditLog from "../models/auditLog.model.js" 
+import Consent from "../models/consent.model.js";
 
 
 const registerPatient = async (req,res)=>{
@@ -273,4 +274,37 @@ const getMyAuditLogs = async (req,res) => {
   }
 }
 
-export {registerPatient,loginPatient,getPatientProfile,updatePatientProfile,changePassword,forgotPassword,verifyOtp,resetPassword,getMyAuditLogs}
+const revokeConsent = async (req, res) => {
+  try {
+    const { doctorId } = req.body;
+
+    const consent = await Consent.findOne({
+      patientId: req.patient.patientID,
+      doctorId,
+      accessGranted: true,
+    });
+
+    if (!consent) {
+      return res.status(404).json({
+        message: "No Active Consent Found",
+      });
+    }
+
+    consent.accessGranted = false;
+
+    await consent.save();
+
+    return res.status(200).json({
+      message: "Consent Revoked Successfully",
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};
+
+export {registerPatient,loginPatient,getPatientProfile,updatePatientProfile,changePassword,forgotPassword,verifyOtp,resetPassword,getMyAuditLogs,revokeConsent}
