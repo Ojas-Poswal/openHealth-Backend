@@ -40,6 +40,11 @@ const patientSchema = new mongoose.Schema(
             type : String,
             unique : true
         },
+        profileVisibility: {
+         type: String,
+         enum: ["PUBLIC", "PRIVATE"],
+         default: "PRIVATE"
+        },
         resetOtp: {
           type: String
         },

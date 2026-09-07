@@ -469,3 +469,240 @@ Not a document storage platform.
 Not a hospital management system.
 
 But a lifelong healthcare companion that preserves, explains, and securely transfers medical knowledge across generations.
+
+# Family Groups System
+
+## Purpose
+
+Allows patients to organize trusted family members into groups and securely access shared healthcare information.
+
+Family Groups are not chat groups.
+
+They are healthcare trust networks that provide access to:
+
+- Medical Timelines
+- AI Health Summaries
+- Digital Will Information
+
+---
+
+## Core Philosophy
+
+A Family Group acts as a container for trusted individuals.
+
+Each member retains their own medical records, timeline, AI summaries, and digital will.
+
+Group members can navigate between profiles within the same group.
+
+---
+
+## Membership Rules
+
+### Multiple Group Support
+
+A patient can belong to multiple family groups.
+
+Examples:
+
+- Poswal Family
+- Grandparents Group
+- Emergency Care Group
+
+---
+
+## Roles
+
+### Admin
+
+Can:
+
+- Add Members
+- Remove Members
+- Promote Admins
+- Demote Admins
+- Delete Group
+
+### Member
+
+Can:
+
+- View Group
+- Access Authorized Profiles
+- Leave Group
+
+---
+
+## Group Discovery
+
+Groups can be found using:
+
+- OHID
+- Phone Number
+- Invitation Code
+
+Name-based search is not included in V1.
+
+---
+
+## Join Policies
+
+### Public Group
+
+Users can join immediately.
+
+Flow:
+
+Join Request
+
+↓
+
+Member Added
+
+### Private Group
+
+Admin approval required.
+
+Flow:
+
+Join Request
+
+↓
+
+Admin Approval
+
+↓
+
+Member Added
+
+---
+
+## Profile Navigation
+
+Inside a Family Group, members appear as profile cards.
+
+Example:
+
+👤 Father
+
+👤 Mother
+
+👤 Son
+
+👤 Grandmother
+
+Selecting a profile opens that member's healthcare view.
+
+---
+
+## Available Sections
+
+### Timeline
+
+Displays:
+
+- Medical Cases
+- Reports
+- Doctor Notes
+- Prescriptions
+
+### AI Summary
+
+Displays AI-generated health summaries for the selected member.
+
+### Digital Will
+
+Displays Digital Will status.
+
+Example:
+
+Digital Will
+
+Status: Locked
+
+---
+
+## Digital Will Access
+
+Digital Will content remains locked until death verification.
+
+Flow:
+
+Patient Death
+
+↓
+
+Death Certificate Uploaded
+
+↓
+
+Verification
+
+↓
+
+Digital Will Unlocked
+
+---
+
+## Relationship Support
+
+Each member stores a relationship label.
+
+Examples:
+
+- Father
+- Mother
+- Son
+- Daughter
+- Spouse
+- Grandfather
+- Grandmother
+- Guardian
+
+This relationship data is used for:
+
+- UI Display
+- AI Summaries
+- Beneficiary Management
+- Future Notifications
+
+---
+
+## Security
+
+- Multiple Admins Supported
+- Members Can Leave Groups
+- Admins Can Remove Members
+- Patients Can Belong To Multiple Groups
+- Digital Wills Remain Locked Until Verification
+
+---
+
+## Future Enhancements
+
+### Emergency Access
+
+Allows healthcare access when a patient cannot provide approval.
+
+Example:
+
+Patient Unconscious
+
+↓
+
+Emergency Access Request
+
+↓
+
+Audit Logged
+
+↓
+
+Temporary Access Granted
+
+### Family Health Dashboard
+
+Aggregated AI summaries for all family members.
+
+### Family Notifications
+
+Critical health alerts shared with designated family members.

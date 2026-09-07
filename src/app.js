@@ -6,6 +6,7 @@ import medicalCaseRouter from "./routes/medicalCase.routes.js"
 import reportRouter from "./routes/report.routes.js"
 import doctorNoteRouter from "./routes/doctorNote.routes.js"
 import prescriptionRoutes from "./routes/prescription.routes.js";
+import familyRoutes from "./routes/family.routes.js";
 import cors from "cors"
 
 const app = express()
@@ -21,5 +22,5 @@ app.use("/api/v1/medical-case",medicalCaseRouter)
 app.use("/api/v1/reports",reportRouter)
 app.use("/api/v1/doctor-notes", doctorNoteRouter);
 app.use("/api/v1/prescriptions",prescriptionRoutes)
-
+app.use("/api/v1/family", familyRoutes);
 export default app;

@@ -2928,3 +2928,153 @@ Success Response
 ### Outcome
 
 Patients can upload medical reports directly to OpenHealth and access them later through their medical timeline.
+
+## Family Group Creation
+
+### Endpoint
+
+POST /api/v1/family/create
+
+### Authentication
+
+Requires a valid Patient JWT.
+
+### Purpose
+
+Allows a patient to create a private healthcare family group.
+
+### Flow
+
+Patient JWT
+
+↓
+
+Verify Patient
+
+↓
+
+Generate Invitation Code
+
+↓
+
+Create Family Group
+
+↓
+
+Add Creator As Admin
+
+↓
+
+Add Creator As Member
+
+↓
+
+Success Response
+
+### Request Body
+
+```json
+{
+  "groupName": "Poswal Family"
+}
+```
+
+### Group Fields
+
+- groupName
+- invitationCode
+- admins
+- members
+
+### Default Member Entry
+
+```json
+{
+  "patientId": "PATIENT_ID",
+  "relationship": "Self"
+}
+```
+
+### Security
+
+- Valid Patient JWT required
+- Family Groups are private by default
+- Creator becomes first admin
+- Creator becomes first member
+- Invitation code is generated automatically
+
+### Response
+
+```json
+{
+  "message": "Family Group Created Successfully",
+  "familyGroup": {}
+}
+```
+
+### Outcome
+
+Patients can create private family healthcare groups that will later support timeline access, AI summaries, digital wills, and family health management.
+```
+
+---
+
+## Family Group Listing
+
+### Endpoint
+
+GET /api/v1/family/my-groups
+
+### Authentication
+
+Requires a valid Patient JWT.
+
+### Purpose
+
+Fetches all family groups where the logged-in patient is a member.
+
+### Flow
+
+Patient JWT
+
+↓
+
+Verify Patient
+
+↓
+
+Find Groups Containing Patient
+
+↓
+
+Return Groups
+
+↓
+
+Success Response
+
+### Query Logic
+
+```js
+FamilyGroup.find({
+  "members.patientId": req.patient.patientID
+})
+```
+
+### Security
+
+- Valid Patient JWT required
+- Only groups containing the patient are returned
+
+### Response
+
+```json
+{
+  "message": "Groups fetched successfully",
+  "groups": []
+}
+```
+
+### Outcome
+
+Patients can view all family groups they belong to and access them from the frontend dashboard.
