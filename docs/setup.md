@@ -3078,3 +3078,302 @@ FamilyGroup.find({
 ### Outcome
 
 Patients can view all family groups they belong to and access them from the frontend dashboard.
+
+## Family Group Invitation System
+
+### Purpose
+
+Allows Family Group admins to invite patients into a family group while ensuring the invited patient explicitly approves membership.
+
+### Workflow
+
+Group Admin
+
+↓
+
+Send Invitation
+
+↓
+
+Invitation Stored
+
+↓
+
+Patient Views Pending Invitations
+
+↓
+
+Accept / Reject Invitation
+
+↓
+
+Membership Updated
+
+---
+
+## Family Invite Model
+
+### Collection
+
+FamilyInvite
+
+### Fields
+
+- groupId
+- invitedPatientId
+- invitedBy
+- relationship
+- status
+
+### Status Values
+
+- PENDING
+- ACCEPTED
+- REJECTED
+
+### Purpose
+
+Stores pending and completed family group invitations.
+
+---
+
+## Invite Member API
+
+### Endpoint
+
+POST /api/v1/family/invite-member
+
+### Authentication
+
+Requires a valid Patient JWT.
+
+### Purpose
+
+Allows a Family Group admin to invite another patient into the group.
+
+### Request Body
+
+```json
+{
+  "groupId": "GROUP_ID",
+  "ohid": "OH-XXXX",
+  "relationship": "Father"
+}
+```
+
+### Flow
+
+Patient JWT
+
+↓
+
+Verify Family Group
+
+↓
+
+Verify Admin Access
+
+↓
+
+Find Patient By OHID
+
+↓
+
+Check Existing Membership
+
+↓
+
+Check Existing Pending Invite
+
+↓
+
+Create Invitation
+
+↓
+
+Success Response
+
+### Security
+
+- Valid Patient JWT required
+- Only group admins can send invitations
+- Duplicate pending invites prevented
+- Existing members cannot be re-invited
+
+### Response
+
+```json
+{
+  "message": "Invitation sent successfully",
+  "invite": {}
+}
+```
+
+### Outcome
+
+Family Group admins can securely invite patients into healthcare groups.
+
+---
+
+## Get My Invites API
+
+### Endpoint
+
+GET /api/v1/family/my-invites
+
+### Authentication
+
+Requires a valid Patient JWT.
+
+### Purpose
+
+Allows patients to view all pending family group invitations.
+
+### Flow
+
+Patient JWT
+
+↓
+
+Find Pending Invitations
+
+↓
+
+Return Invitations
+
+↓
+
+Success Response
+
+### Query Logic
+
+```js
+FamilyInvite.find({
+  invitedPatientId: req.patient.patientID,
+  status: "PENDING"
+})
+```
+
+### Security
+
+- Valid Patient JWT required
+- Patients can only view their own invitations
+
+### Response
+
+```json
+{
+  "message": "Invites fetched successfully",
+  "invites": []
+}
+```
+
+### Outcome
+
+Patients can view all family group invitations awaiting action.
+
+---
+
+## Accept Invite API
+
+### Endpoint
+
+POST /api/v1/family/accept-invite
+
+### Authentication
+
+Requires a valid Patient JWT.
+
+### Purpose
+
+Allows patients to join a Family Group after approving an invitation.
+
+### Request Body
+
+```json
+{
+  "inviteId": "INVITE_ID"
+}
+```
+
+### Flow
+
+Patient JWT
+
+↓
+
+Verify Invite
+
+↓
+
+Verify Invite Ownership
+
+↓
+
+Update Invite Status
+
+↓
+
+Find Family Group
+
+↓
+
+Add Member To Group
+
+↓
+
+Save Group
+
+↓
+
+Success Response
+
+### Security
+
+- Valid Patient JWT required
+- Patients can only accept their own invitations
+- Group membership is granted only after approval
+
+### Response
+
+```json
+{
+  "message": "Invite accepted successfully"
+}
+```
+
+### Outcome
+
+Patients become official members of a Family Group after approving the invitation.
+
+---
+
+## Family Group Membership Flow
+
+### Complete Flow
+
+Create Group
+
+↓
+
+Invite Member
+
+↓
+
+Patient Views Invites
+
+↓
+
+Patient Accepts Invite
+
+↓
+
+Patient Added To Family Group
+
+↓
+
+Visible In My Groups
+
+### Outcome
+
+Family Groups now support secure invitation-based membership management while maintaining patient consent and healthcare privacy.
