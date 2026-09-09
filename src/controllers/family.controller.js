@@ -172,6 +172,12 @@ const acceptInvite = async (req, res) => {
       });
     }
 
+    if (invite.status !== "PENDING") {
+        return res.status(400).json({
+        message: "Invite already processed"
+       });
+    }
+
     if (
       invite.invitedPatientId.toString() !==
       req.patient.patientID
@@ -208,4 +214,360 @@ const acceptInvite = async (req, res) => {
   }
 };
 
-export { createFamilyGroup, getMyGroups, inviteMember, getMyInvites, acceptInvite };
+const rejectInvite = async (req,res) => {
+  try {
+    const {inviteId} = req.body;
+
+    const invite = await FamilyInvite.findById(inviteId);
+
+    if(!invite){
+      return res.status(404).json({
+        message : "Invite not found"
+      })
+    }
+
+    if (invite.status !== "PENDING") {
+        return res.status(400).json({
+        message: "Invite already processed"
+      });
+    }
+
+    if(invite.invitedPatientId.toString() !== req.patient.patientID){
+      return res.status(403).json({
+        message : "Access Denied"
+      })
+    }
+
+    invite.status = "REJECTED"
+
+    await invite.save();
+
+    return res.status(200).json({
+      message : "Invite Rejected Successfully"
+    })
+  }catch(error){
+    console.error(error);
+
+    return res.status(500).json({
+      message : "internal Server Error"
+    })
+  }
+}
+
+const leaveGroup = async (req,res) => {
+  try{
+    const {groupId} = req.body;
+
+    const group = await FamilyGroup.findById(groupId);
+
+    if(!group){
+      return res.status(404).json({
+        message : "Group not found"
+      })
+    }
+
+    const patientId = req.patient.patientID;
+
+    const isMember = group.members.some(member => member.patientId.toString() === patientId);
+
+    if(!isMember){
+      return res.status(403).json({
+        message : "You are not a member of this group"
+      })
+    }
+
+    const isAdmin = group.admins.some(admin => admin.toString() === patientId)
+
+    if(isAdmin && group.admins.length === 1){
+      return res.status(400).json({
+        message : "You are the last admin. Please promote someone else to an admin before leaving this group"
+      })
+    }
+
+    group.members = group.members.filter(member => member.patientId.toString() !== patientId)
+
+    if (isAdmin) {
+      group.admins = group.admins.filter(
+        admin =>
+          admin.toString() !== patientId
+      );
+    }
+
+     if (group.members.length === 0) {
+      await FamilyGroup.findByIdAndDelete(groupId);
+
+      return res.status(200).json({
+        message: "Group deleted successfully"
+      });
+    }
+
+    await group.save();
+
+    return res.status(200).json({
+      message : "Group Left Successfully"
+    })
+  }catch(error){
+    console.error(error);
+    return res.status(500).json({
+      message : "internal Server Error"
+    })
+  }
+}
+
+const promoteToAdmin = async (req,res) => {
+  try{
+    const {groupId,patientId} = req.body;
+
+    const group = await FamilyGroup.findById(groupId)
+
+    if (!group) {
+      return res.status(404).json({
+        message: "Group not found"
+      });
+    }
+
+     const isAdmin = group.admins.some(
+      admin =>
+        admin.toString() === req.patient.patientID
+    );
+
+    if (!isAdmin) {
+      return res.status(403).json({
+        message: "Only admins can promote members"
+      });
+    }
+
+    const isMember = group.members.some(
+      member =>
+        member.patientId.toString() === patientId
+    );
+
+    if (!isMember) {
+      return res.status(400).json({
+        message: "Patient is not a member of this group"
+      });
+    }
+
+    const alreadyAdmin = group.admins.some(
+      admin =>
+        admin.toString() === patientId
+    );
+
+    if (alreadyAdmin) {
+      return res.status(400).json({
+        message: "Patient is already an admin"
+      });
+    }
+
+    group.admins.push(patientId);
+
+    await group.save();
+
+    return res.status(200).json({
+      message: "Admin promoted successfully"
+    });
+
+   }catch(error){
+    console.error(error);
+
+    return res.status(500).json({
+      message : "Internal Server Error"
+    })
+  }
+}
+
+const demoteAdmin = async (req, res) => {
+  try {
+
+    const { groupId, patientId } = req.body;
+
+    const group = await FamilyGroup.findById(groupId);
+
+    if (!group) {
+      return res.status(404).json({
+        message: "Group not found"
+      });
+    }
+
+    const isRequesterAdmin = group.admins.some(
+      admin =>
+        admin.toString() === req.patient.patientID
+    );
+
+    if (!isRequesterAdmin) {
+      return res.status(403).json({
+        message: "Only admins can demote admins"
+      });
+    }
+
+    const isTargetAdmin = group.admins.some(
+      admin =>
+        admin.toString() === patientId
+    );
+
+    if (!isTargetAdmin) {
+      return res.status(400).json({
+        message: "Patient is not an admin"
+      });
+    }
+
+    if (group.admins.length === 1) {
+      return res.status(400).json({
+        message: "Cannot demote the last admin"
+      });
+    }
+
+    group.admins = group.admins.filter(
+      admin =>
+        admin.toString() !== patientId
+    );
+
+    await group.save();
+
+    return res.status(200).json({
+      message: "Admin demoted successfully"
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Internal Server Error"
+    });
+  }
+};
+
+const removeMember = async (req, res) => {
+  try {
+
+    const { groupId, patientId } = req.body;
+
+    const group = await FamilyGroup.findById(groupId);
+
+    if (!group) {
+      return res.status(404).json({
+        message: "Group not found"
+      });
+    }
+
+    const isAdmin = group.admins.some(
+      admin =>
+        admin.toString() === req.patient.patientID
+    );
+
+    if (!isAdmin) {
+      return res.status(403).json({
+        message: "Only admins can remove members"
+      });
+    }
+
+    if (patientId === req.patient.patientID) {
+      return res.status(400).json({
+        message: "Use leave group instead"
+      });
+    }
+
+    const isMember = group.members.some(
+      member =>
+        member.patientId.toString() === patientId
+    );
+
+    if (!isMember) {
+      return res.status(404).json({
+        message: "Member not found"
+      });
+    }
+
+    const isTargetAdmin = group.admins.some(
+      admin =>
+        admin.toString() === patientId
+    );
+
+    if (
+      isTargetAdmin &&
+      group.admins.length === 1
+    ) {
+      return res.status(400).json({
+        message: "Cannot remove the last admin"
+      });
+    }
+
+    group.members = group.members.filter(
+      member =>
+        member.patientId.toString() !== patientId
+    );
+
+    if (isTargetAdmin) {
+      group.admins = group.admins.filter(
+        admin =>
+          admin.toString() !== patientId
+      );
+    }
+
+    if (group.members.length === 0) {
+      await FamilyGroup.findByIdAndDelete(groupId);
+
+      return res.status(200).json({
+        message: "Group deleted successfully"
+      });
+    }
+
+    await group.save();
+
+    return res.status(200).json({
+      message: "Member removed successfully"
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Internal Server Error"
+    });
+  }
+};
+
+const deleteGroup = async (req, res) => {
+  try {
+
+    const { groupId } = req.body;
+
+    const group = await FamilyGroup.findById(groupId);
+
+    if (!group) {
+      return res.status(404).json({
+        message: "Group not found"
+      });
+    }
+
+    const isAdmin = group.admins.some(
+      admin =>
+        admin.toString() === req.patient.patientID
+    );
+
+    if (!isAdmin) {
+      return res.status(403).json({
+        message: "Only admins can delete groups"
+      });
+    }
+
+    await FamilyGroup.findByIdAndDelete(groupId);
+
+    await FamilyInvite.deleteMany({
+      groupId
+    });
+
+    return res.status(200).json({
+      message: "Group deleted successfully"
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Internal Server Error"
+    });
+  }
+};
+
+export {createFamilyGroup, getMyGroups, inviteMember, getMyInvites, acceptInvite, rejectInvite, leaveGroup,promoteToAdmin,demoteAdmin,removeMember,deleteGroup};

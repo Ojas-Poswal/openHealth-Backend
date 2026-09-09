@@ -841,3 +841,64 @@ With ES Modules, imported files execute before the remaining code in the importi
 When a configuration file depends on environment variables, ensure the variables are loaded before accessing them.
 
 For critical configuration modules such as Cloudinary, explicitly loading dotenv inside the configuration file prevents initialization-order issues.
+
+## Bug: Processed Invite Could Be Reprocessed
+
+### Feature
+
+Family Group Invitation System
+
+### Problem
+
+An invitation could be accepted and then later rejected using the same invite ID.
+
+### Reproduction
+
+Create Invite
+
+↓
+
+Accept Invite
+
+↓
+
+Invite Status = ACCEPTED
+
+↓
+
+Call Reject Invite API
+
+↓
+
+Invite Status Changed To REJECTED
+
+### Cause
+
+The APIs only verified that the invite existed and belonged to the patient.
+
+They did not verify whether the invite had already been processed.
+
+### Fix
+
+Added a status check before processing:
+
+```js
+if (invite.status !== "PENDING") {
+  return res.status(400).json({
+    message: "Invite already processed"
+  });
+}
+```
+
+### Lesson Learned
+
+Whenever a workflow contains states such as:
+
+- PENDING
+- ACCEPTED
+- REJECTED
+
+all state transitions must be validated.
+
+A completed action should not be allowed to execute again.
+```

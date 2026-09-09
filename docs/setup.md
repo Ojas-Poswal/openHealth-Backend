@@ -3377,3 +3377,324 @@ Visible In My Groups
 ### Outcome
 
 Family Groups now support secure invitation-based membership management while maintaining patient consent and healthcare privacy.
+
+# Family Group Module
+
+## Overview
+
+Family Groups allow patients to create healthcare groups with family members and securely share healthcare information.
+
+Membership is invitation-based and requires patient approval.
+
+---
+
+## Family Group Model
+
+### Fields
+
+- groupName
+- invitationCode
+- admins
+- members
+
+### Member Fields
+
+- patientId
+- relationship
+
+### Features
+
+- Multiple admins supported
+- Multiple members supported
+- Patients can belong to multiple groups
+
+---
+
+## Family Invitation Model
+
+### Fields
+
+- groupId
+- invitedPatientId
+- invitedBy
+- relationship
+- status
+
+### Status
+
+- PENDING
+- ACCEPTED
+- REJECTED
+
+---
+
+## Create Family Group
+
+### Endpoint
+
+POST /api/v1/family/create
+
+### Authentication
+
+Patient JWT Required
+
+### Purpose
+
+Creates a new Family Group.
+
+### Outcome
+
+Creator becomes:
+
+- Admin
+- Member (Self)
+
+---
+
+## Get My Groups
+
+### Endpoint
+
+GET /api/v1/family/my-groups
+
+### Authentication
+
+Patient JWT Required
+
+### Purpose
+
+Returns all groups where the patient is a member.
+
+---
+
+## Invite Member
+
+### Endpoint
+
+POST /api/v1/family/invite-member
+
+### Authentication
+
+Patient JWT Required
+
+### Purpose
+
+Allows admins to invite patients using OHID.
+
+### Security
+
+- Admin only
+- Duplicate pending invites prevented
+- Existing members cannot be re-invited
+
+---
+
+## Get My Invites
+
+### Endpoint
+
+GET /api/v1/family/my-invites
+
+### Authentication
+
+Patient JWT Required
+
+### Purpose
+
+Returns all pending invitations for the logged-in patient.
+
+---
+
+## Accept Invite
+
+### Endpoint
+
+POST /api/v1/family/accept-invite
+
+### Authentication
+
+Patient JWT Required
+
+### Purpose
+
+Accepts a pending invitation.
+
+### Outcome
+
+- Invite status updated to ACCEPTED
+- Patient added to group members
+
+---
+
+## Reject Invite
+
+### Endpoint
+
+POST /api/v1/family/reject-invite
+
+### Authentication
+
+Patient JWT Required
+
+### Purpose
+
+Rejects a pending invitation.
+
+### Outcome
+
+- Invite status updated to REJECTED
+
+---
+
+## Leave Group
+
+### Endpoint
+
+POST /api/v1/family/leave-group
+
+### Authentication
+
+Patient JWT Required
+
+### Rules
+
+- Members can leave groups
+- Last admin cannot leave
+- Another admin must exist first
+
+### Outcome
+
+Patient removed from:
+
+- Members
+- Admins (if applicable)
+
+### Auto Delete
+
+Group is automatically deleted if no members remain.
+
+---
+
+## Promote Admin
+
+### Endpoint
+
+POST /api/v1/family/promote-admin
+
+### Authentication
+
+Patient JWT Required
+
+### Purpose
+
+Promotes a group member to admin.
+
+### Security
+
+- Admin only
+- Member must belong to group
+
+---
+
+## Demote Admin
+
+### Endpoint
+
+POST /api/v1/family/demote-admin
+
+### Authentication
+
+Patient JWT Required
+
+### Rules
+
+- Admin only
+- Last admin cannot be demoted
+
+---
+
+## Remove Member
+
+### Endpoint
+
+POST /api/v1/family/remove-member
+
+### Authentication
+
+Patient JWT Required
+
+### Rules
+
+- Admin only
+- Cannot remove yourself
+- Use Leave Group instead
+- Last admin cannot be removed
+
+---
+
+## Delete Group
+
+### Endpoint
+
+DELETE /api/v1/family/delete-group
+
+### Authentication
+
+Patient JWT Required
+
+### Rules
+
+- Admin only
+
+### Outcome
+
+- Family Group deleted
+- Associated invitations deleted
+
+---
+
+## Future Enhancements
+
+### Timeline Sharing
+
+Endpoint:
+
+GET /api/v1/family/member/:patientId/timeline
+
+Purpose:
+
+Allow family members to view each other's timelines.
+
+Status:
+
+Pending
+
+---
+
+### AI Summary Sharing
+
+Endpoint:
+
+GET /api/v1/family/member/:patientId/ai-summary
+
+Purpose:
+
+Allow family members to view each other's AI-generated health summaries.
+
+Status:
+
+Pending
+
+---
+
+## Outcome
+
+Family Groups now provide:
+
+- Group creation
+- Invitation workflow
+- Membership management
+- Admin management
+- Group deletion
+
+while maintaining patient-controlled onboarding through invitation acceptance.
