@@ -3698,3 +3698,201 @@ Family Groups now provide:
 - Group deletion
 
 while maintaining patient-controlled onboarding through invitation acceptance.
+
+# Digital Will Module
+
+## Overview
+
+Digital Will allows patients to securely store important personal information, instructions, and documents that can later be accessed by authorized family members after verification.
+
+The module is designed to be scalable and section-based.
+
+---
+
+## Digital Will Model
+
+### Fields
+
+- patientId
+- sections
+- isUnlocked
+
+### Section Fields
+
+- title
+- content
+- links
+
+### Example Section
+
+```json
+{
+  "title": "Insurance",
+  "content": "LIC Policy Number 12345",
+  "links": [
+    "https://licindia.in"
+  ]
+}
+```
+
+---
+
+## Default Sections
+
+Digital Will is automatically created with:
+
+- Personal Message
+- Important Documents
+- Insurance
+- Emergency Contacts
+- Bank Details
+- Passwords
+- Final Wishes
+- Custom Notes
+
+---
+
+## Create Digital Will
+
+### Endpoint
+
+POST /api/v1/digital-will/create
+
+### Authentication
+
+Patient JWT Required
+
+### Purpose
+
+Creates a Digital Will for the logged-in patient.
+
+### Rules
+
+- One patient can have only one Digital Will.
+
+### Outcome
+
+Creates default sections for future updates.
+
+---
+
+## Get My Digital Will
+
+### Endpoint
+
+GET /api/v1/digital-will/me
+
+### Authentication
+
+Patient JWT Required
+
+### Purpose
+
+Returns the patient's Digital Will.
+
+---
+
+## Update Section
+
+### Endpoint
+
+PATCH /api/v1/digital-will/update-section
+
+### Authentication
+
+Patient JWT Required
+
+### Purpose
+
+Updates content and links inside a specific section.
+
+### Request Body
+
+```json
+{
+  "title": "Insurance",
+  "content": "LIC Policy Number 12345",
+  "links": [
+    "https://licindia.in"
+  ]
+}
+```
+
+### Features
+
+- Update section content
+- Store clickable links
+- Supports future expansion
+
+---
+
+## Delete Digital Will
+
+### Endpoint
+
+DELETE /api/v1/digital-will/delete
+
+### Authentication
+
+Patient JWT Required
+
+### Purpose
+
+Deletes the patient's Digital Will.
+
+---
+
+## Security
+
+- Patient JWT required
+- Patients can access only their own Digital Will
+- Digital Will remains locked by default
+- Family access not yet implemented
+
+---
+
+## Future Enhancements
+
+### Death Certificate Upload
+
+Purpose:
+
+Allow family members to submit proof of death.
+
+### Death Verification
+
+Purpose:
+
+Verify uploaded death certificate before unlocking the will.
+
+### Unlock Digital Will
+
+Purpose:
+
+Grant family access after verification.
+
+### Family Digital Will Access
+
+Purpose:
+
+Allow authorized family members to view the Digital Will.
+
+### Audit Logs
+
+Purpose:
+
+Track all Digital Will access activity.
+
+---
+
+## Outcome
+
+Patients can:
+
+- Create a Digital Will
+- Store important information
+- Organize information into sections
+- Add useful links
+- Update information anytime
+
+while maintaining a scalable structure for future Digital Will features.
