@@ -3896,3 +3896,124 @@ Patients can:
 - Update information anytime
 
 while maintaining a scalable structure for future Digital Will features.
+
+# Death Certificate Module
+
+## Overview
+
+Allows family members to upload a death certificate for a patient.
+
+The module currently stores and retrieves death certificates.
+
+Verification and Digital Will unlocking are planned for future releases.
+
+---
+
+## Death Certificate Model
+
+### Fields
+
+- patientId
+- uploadedBy
+- fileUrl
+- status
+- remarks
+
+### Status Values
+
+- PENDING
+- APPROVED
+- REJECTED
+
+---
+
+## Upload Death Certificate
+
+### Endpoint
+
+POST /api/v1/death-certificate/upload
+
+### Authentication
+
+Patient JWT Required
+
+### Content Type
+
+multipart/form-data
+
+### Request Body
+
+| Field | Type |
+|---------|---------|
+| patientId | Text |
+| file | File |
+
+### Security
+
+- Must belong to the same Family Group
+- Death certificate required
+- Duplicate uploads prevented
+
+### Flow
+
+Family Member
+
+↓
+
+Upload Certificate
+
+↓
+
+Cloudinary Upload
+
+↓
+
+Store File URL
+
+↓
+
+Create Death Certificate Record
+
+↓
+
+Success Response
+
+---
+
+## Get Death Certificate
+
+### Endpoint
+
+GET /api/v1/death-certificate/:patientId
+
+### Authentication
+
+Patient JWT Required
+
+### Purpose
+
+Fetch death certificate details for a patient.
+
+---
+
+## Current Scope
+
+Implemented:
+
+- Upload Death Certificate
+- Store Certificate URL
+- Retrieve Certificate
+
+Not Implemented:
+
+- Verification Workflow
+- Certificate Approval
+- Certificate Rejection
+- Digital Will Unlocking
+- Family Digital Will Access
+
+---
+
+## Outcome
+
+OpenHealth can now securely store death certificates while remaining flexible for future verification and unlocking workflows.

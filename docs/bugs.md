@@ -902,3 +902,69 @@ all state transitions must be validated.
 
 A completed action should not be allowed to execute again.
 ```
+
+# Known Bugs
+
+## Family Invitation Bug
+
+### Description
+
+A patient can both accept and reject the same invitation if the API is called after acceptance.
+
+### Expected
+
+Once an invitation is ACCEPTED:
+
+- Reject should not be allowed
+- Status should remain ACCEPTED
+
+### Current Status
+
+Bug Identified
+
+### Priority
+
+Medium
+
+---
+
+## Death Verification Design Issue
+
+### Description
+
+Digital Will unlocking currently lacks a trustworthy death verification mechanism.
+
+### Example
+
+Family Member
+
+↓
+
+Uploads Fake Death Certificate
+
+↓
+
+Family Admin Approves
+
+↓
+
+Digital Will Unlocked
+
+### Risk
+
+Sensitive information may be exposed while the patient is still alive.
+
+### Current Status
+
+Feature intentionally postponed.
+
+### Future Solutions
+
+- Government Verification
+- Challenge Period
+- Patient Confirmation Workflow
+- Manual Review System
+
+### Priority
+
+High

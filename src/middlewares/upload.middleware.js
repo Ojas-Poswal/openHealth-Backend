@@ -9,6 +9,8 @@ const storage = new CloudinaryStorage({
         resource_type: "auto",
     }
 })
+ 
+console.log("It's reaching")
 
 const upload = multer({storage})
 
