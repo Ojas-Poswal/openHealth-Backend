@@ -2,6 +2,10 @@ import FamilyGroup from "../models/familyGroup.model.js";
 import FamilyInvite from "../models/familyInvite.model.js";
 import { v4 as uuidv4 } from "uuid";
 import Patient from "../models/patient.model.js";
+import MedicalCase from "../models/medicalCase.model.js";
+import Report from "../models/report.model.js";
+import DoctorNote from "../models/doctorNote.model.js";
+import Prescription from "../models/prescription.model.js";
 
 
 const createFamilyGroup = async (req, res) => {
@@ -570,4 +574,71 @@ const deleteGroup = async (req, res) => {
   }
 };
 
-export {createFamilyGroup, getMyGroups, inviteMember, getMyInvites, acceptInvite, rejectInvite, leaveGroup,promoteToAdmin,demoteAdmin,removeMember,deleteGroup};
+const getFamilyMemberTimeline = async (req,res) => {
+    try {
+
+        const { patientId } = req.params;
+
+        const familyGroup = await FamilyGroup.findOne({
+            "members.patientId": {
+                $all: [
+                    req.patient.patientID,
+                    patientId
+                ]
+            }
+        });
+
+        if(!familyGroup){
+            return res.status(403).json({
+                message: "Access Denied"
+            });
+        }
+
+        const medicalCases = await MedicalCase.find({
+            patientId
+        }).sort({ createdAt: -1 });
+
+        const timeline = await Promise.all(
+            medicalCases.map(async (medicalCase) => {
+
+                const reports = await Report.find({
+                    medicalCaseId: medicalCase._id
+                });
+
+                const doctorNotes = await DoctorNote.find({
+                    reportId: {
+                        $in: reports.map(
+                            report => report._id
+                        )
+                    }
+                });
+
+                const prescriptions = await Prescription.find({
+                    medicalCaseId: medicalCase._id
+                }).sort({ createdAt: -1 });
+
+                return {
+                    medicalCase,
+                    reports,
+                    doctorNotes,
+                    prescriptions
+                };
+            })
+        );
+
+        return res.status(200).json({
+            message: "Timeline fetched successfully",
+            timeline
+        });
+
+    } catch(error) {
+
+        console.error(error);
+
+        return res.status(500).json({
+            message: "Internal Server Error"
+        });
+    }
+};
+
+export {createFamilyGroup, getMyGroups, inviteMember, getMyInvites, acceptInvite, rejectInvite, leaveGroup,promoteToAdmin,demoteAdmin,removeMember,deleteGroup,getFamilyMemberTimeline};

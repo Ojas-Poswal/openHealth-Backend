@@ -1,6 +1,7 @@
 import { Router } from "express";
 import verifyPatient from "../middlewares/auth.middleware.js";
 import {createFamilyGroup,getMyGroups,inviteMember,getMyInvites,acceptInvite,rejectInvite,leaveGroup,promoteToAdmin,demoteAdmin,removeMember,deleteGroup} from "../controllers/family.controller.js";
+import { getFamilyMemberTimeline } from "../controllers/family.controller.js";
 
 const router = Router();
 
@@ -15,5 +16,6 @@ router.post("/promote-admin",verifyPatient,promoteToAdmin);
 router.post("/demote-admin",verifyPatient,demoteAdmin);
 router.post("/remove-member",verifyPatient,removeMember);
 router.delete("/delete-group",verifyPatient,deleteGroup)
+router.get("/timeline/:patientId",verifyPatient,getFamilyMemberTimeline);
 
 export default router;

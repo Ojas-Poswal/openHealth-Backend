@@ -1,4 +1,4 @@
-import {Router} from express
+import {Router} from "express"
 import verifyPatient from "../middlewares/auth.middleware.js"
 
 import {generateAISummary,getAISummary} from "../controllers/aiSummary.controller.js"

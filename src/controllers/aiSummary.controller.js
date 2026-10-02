@@ -1,6 +1,6 @@
 import AISummary from "../models/aiSummary.model.js"
 import MedicalCase from "../models/medicalCase.model.js";
-import openai from "../config/openai.js";
+
 
 const generateAISummary = async (req,res) => {
     try{

@@ -4017,3 +4017,84 @@ Not Implemented:
 ## Outcome
 
 OpenHealth can now securely store death certificates while remaining flexible for future verification and unlocking workflows.
+
+---
+
+# Family Timeline Access
+
+## Endpoint
+
+GET /api/v1/family/timeline/:patientId
+
+## Authentication
+
+Patient JWT Required
+
+## Purpose
+
+Allows a patient to view the medical timeline of another member within the same family group.
+
+---
+
+## Access Rules
+
+- Requester must belong to the same family group.
+- Target patient must belong to the same family group.
+- Access is denied if both patients are not members of the same family group.
+
+---
+
+## Flow
+
+Patient Requests Family Member Timeline
+
+↓
+
+Validate JWT
+
+↓
+
+Verify Both Patients Belong To Same Family Group
+
+↓
+
+Fetch Medical Cases
+
+↓
+
+Fetch Reports
+
+↓
+
+Fetch Doctor Notes
+
+↓
+
+Fetch Prescriptions
+
+↓
+
+Build Timeline
+
+↓
+
+Return Timeline
+
+---
+
+## Response
+
+Returns:
+
+- Medical Cases
+- Reports
+- Doctor Notes
+- Prescriptions
+
+for the requested family member.
+
+---
+
+## Outcome
+
+Family members can securely access each other's medical timelines while maintaining family-group based authorization.

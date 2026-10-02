@@ -11,6 +11,7 @@ import cors from "cors"
 import digitalWillRoutes from "./routes/digitalWill.routes.js"
 import deathCertificateRoutes from "./routes/deathCertificate.routes.js"
 import aiSummaryRoutes from "./routes/aiSummary.routes.js"
+import testAIRoutes from "./routes/testAI.routes.js";
 
 const app = express()
 
@@ -29,6 +30,7 @@ app.use("/api/v1/family", familyRoutes);
 app.use("/api/v1/digital-will",digitalWillRoutes);
 app.use("/api/v1/death-certificate",deathCertificateRoutes)
 app.use("/api/v1/ai-summary",aiSummaryRoutes)
+app.use("/api/v1/test-ai",testAIRoutes)
 
 
 export default app;
