@@ -1,4 +1,5 @@
 import DigitalWill from "../models/digitalWill.model.js";
+import FamilyGroup from "../models/familyGroup.model.js";
 
 const defaultSections = [
     { title: "Personal Message" },
@@ -136,4 +137,101 @@ const deleteDigitalWill = async (req, res) => {
     }
 };
 
-export {createDigitalWill,getMyDigitalWill,updateSection,deleteDigitalWill}
+const getFamilyMemberDigitalWill = async (req,res) => {
+    try{
+      const {patientId} = req.params;
+
+      const familyGroup = await FamilyGroup.findOne({
+        "members.patientId": {
+            $all: [
+                req.patient.patientID,
+                patientId
+            ]
+        }
+      })
+
+      if(!familyGroup){
+        return res.status(403).json({
+            message : "You are not authorized to view this Digital Will"
+        })
+      }
+
+      const digitalWill = await DigitalWill.findOne({
+         patientId
+      })
+
+      if(!digitalWill){
+        return res.status(404).json({
+            message : "Digital Will Does Not Exist"
+        })
+      }
+
+        if (!digitalWill.isUnlocked) {
+            return res.status(403).json({
+                message: "Digital Will is locked"
+            });
+        }
+
+      return res.status(200).json({
+        message : "Digital Will fetched successfully",
+        digitalWill
+      })
+    }catch(error){
+        console.error(error);
+
+        return res.status(500).json({
+            message : "Internal Server Error"
+        })
+    }
+}
+
+const approveDeathCertificate = async (req, res) => {
+    try {
+
+        const { patientId } = req.body;
+
+        const familyGroup = await FamilyGroup.findOne({
+            "members.patientId": patientId,
+            admins: req.patient.patientID
+        });
+
+        if (!familyGroup) {
+            return res.status(403).json({
+                message: "Only family admins can approve"
+            });
+        }
+
+        const certificate = await DeathCertificate.findOne({
+            patientId
+        });
+
+        if (!certificate) {
+            return res.status(404).json({
+                message: "Death Certificate not found"
+            });
+        }
+
+        certificate.status = "APPROVED";
+
+        await certificate.save();
+
+        await DigitalWill.findOneAndUpdate(
+            { patientId },
+            { isUnlocked: true }
+        );
+
+        return res.status(200).json({
+            message: "Death Certificate approved and Digital Will unlocked"
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        return res.status(500).json({
+            message: "Internal Server Error"
+        });
+    }
+};
+
+export {createDigitalWill,getMyDigitalWill,updateSection,deleteDigitalWill,getFamilyMemberDigitalWill,approveDeathCertificate}

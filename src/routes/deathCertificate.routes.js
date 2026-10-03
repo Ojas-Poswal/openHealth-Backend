@@ -10,4 +10,5 @@ const router = Router()
 router.post("/upload",verifyPatient,upload.single("file"),uploadDeathCertificate)
 router.get("/:patientId",verifyPatient,getDeathCertificate)
 
+
 export default router

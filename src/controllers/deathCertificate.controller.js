@@ -1,6 +1,7 @@
 import DeathCertificate from "../models/deathCertificate.model.js";
 import FamilyGroup from "../models/familyGroup.model.js";
 
+
 const uploadDeathCertificate = async (req,res) => {
     try{
         const {patientId} = req.body
@@ -93,5 +94,7 @@ const getDeathCertificate = async (req, res) => {
         });
     }
 };
+
+
 
 export {uploadDeathCertificate,getDeathCertificate}
