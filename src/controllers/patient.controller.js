@@ -274,6 +274,31 @@ const getMyAuditLogs = async (req,res) => {
   }
 }
 
+const getMyConsents = async (req,res) => {
+  try {
+
+    const consents = await Consent.find({
+      patientId: req.patient.patientID
+    })
+    .populate("doctorId","fullName dhid specialization")
+    .sort({createdAt:-1});
+
+    return res.status(200).json({
+      message: "Consents fetched successfully",
+      consents
+    });
+
+  } catch(error) {
+
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Internal Server Error"
+    });
+
+  }
+}
+
 const revokeConsent = async (req, res) => {
   try {
     const { doctorId } = req.body;
@@ -307,4 +332,4 @@ const revokeConsent = async (req, res) => {
   }
 };
 
-export {registerPatient,loginPatient,getPatientProfile,updatePatientProfile,changePassword,forgotPassword,verifyOtp,resetPassword,getMyAuditLogs,revokeConsent}
+export {registerPatient,loginPatient,getPatientProfile,updatePatientProfile,changePassword,forgotPassword,verifyOtp,resetPassword,getMyAuditLogs,revokeConsent,getMyConsents}

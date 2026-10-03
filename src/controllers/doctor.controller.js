@@ -320,6 +320,18 @@ const requestConsent = async (req, res) => {
       });
     }
 
+    const existingConsent = await Consent.findOne({
+        patientId,
+        doctorId: req.doctor._id,
+        accessGranted: true
+    });
+
+    if(existingConsent){
+       return res.status(400).json({
+       message: "Active session already exists"
+     });
+    }
+
     const otp = Math.floor(
       100000 + Math.random() * 900000
     ).toString();
@@ -436,4 +448,34 @@ const endSession = async (req,res) => {
         })
     }
 }
-export {registerDoctor,loginDoctor,getDoctorProfile,changePassword,updateProfile,searchPatientByOHID,getPatientTimeline,requestConsent,verifyConsent,endSession}
+
+const getActiveSessions = async (req,res) => {
+  try {
+
+    const sessions = await Consent.find({
+      doctorId: req.doctor._id,
+      accessGranted: true
+    })
+    .populate(
+      "patientId",
+      "fullName ohid"
+    )
+    .sort({createdAt:-1});
+
+    return res.status(200).json({
+      message: "Active sessions fetched successfully",
+      sessions
+    });
+
+  } catch(error) {
+
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Internal Server Error"
+    });
+
+  }
+}
+
+export {registerDoctor,loginDoctor,getDoctorProfile,changePassword,updateProfile,searchPatientByOHID,getPatientTimeline,requestConsent,verifyConsent,endSession,getActiveSessions}

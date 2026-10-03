@@ -706,3 +706,114 @@ Aggregated AI summaries for all family members.
 ### Family Notifications
 
 Critical health alerts shared with designated family members.
+
+
+---
+
+# Remaining Backend Work
+
+## AI Summary Module
+
+Status: In Progress
+
+Generate health summaries using:
+
+- Medical Cases
+- Reports
+- Doctor Notes
+- Prescriptions
+
+Possible Providers:
+
+- Gemini
+- OpenRouter
+
+---
+
+## Lab Ecosystem
+
+Status: Planned
+
+Labs should be able to:
+
+- Upload Reports
+- Upload MRI Scans
+- Upload CT Scans
+- Upload Blood Reports
+
+Using:
+
+- OHID
+- Patient Verification
+
+---
+
+## Document Verification Engine
+
+Status: Planned
+
+Verification Pipeline:
+
+Upload PDF/Image
+
+↓
+
+OCR Extraction
+
+↓
+
+QR Detection
+
+↓
+
+Digital Signature Validation
+
+↓
+
+Government API / DigiLocker Verification
+
+↓
+
+AI Tampering Detection
+
+↓
+
+Verified / Suspicious
+
+---
+
+## Digital Will Verification
+
+Status: Planned
+
+Future Features:
+
+- Death Certificate Verification
+- Multi-step Approval
+- Beneficiary Access Control
+- Family Unlock Workflow
+
+---
+
+## Production Features
+
+Status: Future Scope
+
+- Email Notifications
+- Real OTP Service
+- Real File Storage (AWS/Supabase)
+- Rate Limiting
+- Admin Dashboard
+- Analytics
+
+---
+
+# OpenHealth Backend V1 Completion
+
+Current Completion: ~90-95%
+
+Remaining for V1:
+
+- AI Summary
+
+Everything else can be treated as future scope/project vision.

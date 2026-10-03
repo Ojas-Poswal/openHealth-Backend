@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { registerDoctor,loginDoctor ,getDoctorProfile,changePassword, updateProfile,searchPatientByOHID,getPatientTimeline,requestConsent,verifyConsent,endSession} from "../controllers/doctor.controller.js";
+import { registerDoctor,loginDoctor ,getDoctorProfile,changePassword, updateProfile,searchPatientByOHID,getPatientTimeline,requestConsent,verifyConsent,endSession,getActiveSessions} from "../controllers/doctor.controller.js";
 import verifyDoctor from "../middlewares/doctorAuth.middleware.js";
 
 const router = Router()
@@ -14,5 +14,6 @@ router.get("/search/:ohid", verifyDoctor, searchPatientByOHID)
 router.get("/patient/:patientId/timeline", verifyDoctor,getPatientTimeline)
 router.post("/verify-consent",verifyDoctor,verifyConsent)
 router.post("/end-session",verifyDoctor,endSession)
+router.get("/active-sessions",verifyDoctor,getActiveSessions)
 
 export default router

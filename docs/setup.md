@@ -4098,3 +4098,93 @@ for the requested family member.
 ## Outcome
 
 Family members can securely access each other's medical timelines while maintaining family-group based authorization.
+
+---
+
+# Updates (02 October)
+
+## Consent System Improvements
+
+### Added Patient Consent Management
+
+- Revoke Consent
+- View Audit Logs
+
+### Added Doctor Consent Management
+
+- Request Consent
+- Verify Consent
+- End Session
+
+### Added Session Visibility
+
+- Doctor Active Sessions
+- Patient Active Consents
+
+### Added Timeline Security
+
+Doctors can access timelines only when:
+
+- Consent exists
+- OTP is verified
+- Session is active
+
+All timeline access is audit logged.
+
+---
+
+## Digital Will Enhancements
+
+### Added Death Certificate Approval Flow
+
+Flow:
+
+Death Certificate Uploaded
+
+↓
+
+Admin Approval
+
+↓
+
+Digital Will Unlocked
+
+Digital Will remains locked until approval.
+
+---
+
+## Family Timeline Access
+
+Family members can now:
+
+- Access authorized family profiles
+- Fetch complete medical timelines
+
+Timeline includes:
+
+- Medical Cases
+- Reports
+- Doctor Notes
+- Prescriptions
+
+Family-group authorization enforced.
+
+---
+
+## Backend Status
+
+Core Backend APIs are now functionally complete.
+
+Modules Completed:
+
+- Patient
+- Doctor
+- Medical Cases
+- Reports
+- Prescriptions
+- Consent
+- Audit Logs
+- Family Groups
+- Digital Will
+- Death Certificate
+- Family Timeline Access
