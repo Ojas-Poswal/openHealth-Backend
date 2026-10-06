@@ -29,6 +29,7 @@
     "mongoose": "^9.9.2",
     "multer": "^2.3.0",
     "multer-storage-cloudinary": "^4.0.0",
+    "nodemailer": "^10.0.15",
     "uuid": "^14.0.2"
   },
   "devDependencies": {

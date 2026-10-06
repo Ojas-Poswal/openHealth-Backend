@@ -40,6 +40,13 @@ const doctorSchema = new mongoose.Schema(
         },
         workplace : {
             type : String
+        },
+        resetOtp: {
+          type: String
+        },
+
+        resetOtpExpiry: {
+          type: Date
         }
     },
     {

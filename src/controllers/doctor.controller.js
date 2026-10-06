@@ -1,4 +1,6 @@
 import Doctor from "../models/doctor.model.js"
+import Otp, { issueOtp, generateOtp } from "../models/otp.model.js"
+import { sendOtpEmail } from "../config/mailer.js"
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 import crypto from "crypto";
@@ -6,9 +8,111 @@ import Patient from "../models/patient.model.js";
 import MedicalCase from "../models/medicalCase.model.js";
 import Report from "../models/report.model.js";
 import DoctorNote from "../models/doctorNote.model.js";
+import Prescription from "../models/prescription.model.js";
 import Consent from "../models/consent.model.js";
 import AuditLog from "../models/auditLog.model.js";
 
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+const isValidEmail = (email) =>
+    typeof email === "string" && EMAIL_PATTERN.test(email.trim())
+
+const normaliseEmail = (email) => email.trim().toLowerCase()
+
+/**
+ * Step 1 of doctor registration — mirrors the patient flow exactly, so an
+ * address is proven to exist before any doctor record is written.
+ */
+const sendDoctorRegistrationOtp = async (req,res) => {
+    try{
+        const {email} = req.body;
+
+        if(!isValidEmail(email)){
+            return res.status(400).json({
+                message : "Enter a valid email address"
+            })
+        }
+
+        const normalised = normaliseEmail(email)
+
+        const existingDoctor = await Doctor.findOne({email : normalised})
+
+        if(existingDoctor){
+            return res.status(409).json({
+                message : "That email is already registered. Try signing in instead"
+            })
+        }
+
+        const otp = await issueOtp(normalised,"doctor-register")
+
+        await sendOtpEmail({
+            to : normalised,
+            otp,
+            purpose : "doctor-register"
+        })
+
+        return res.status(200).json({
+            message : "Verification code sent to your email"
+        })
+    }catch(error){
+        console.error(error);
+
+        return res.status(500).json({
+            message : "Internal Server Error"
+        })
+    }
+}
+
+/** Step 2: confirm the code arrived. */
+const verifyDoctorRegistrationOtp = async (req,res) => {
+    try{
+        const {email,otp} = req.body;
+
+        if(!isValidEmail(email)){
+            return res.status(400).json({
+                message : "Enter a valid email address"
+            })
+        }
+
+        const pending = await Otp.findOne({
+            email : normaliseEmail(email),
+            purpose : "doctor-register"
+        })
+
+        if(!pending){
+            return res.status(400).json({
+                message : "Request a verification code for this email first"
+            })
+        }
+
+        if(pending.expiresAt < Date.now()){
+            return res.status(400).json({
+                message : "That code has expired. Request a new one"
+            })
+        }
+
+        if(pending.otp !== otp){
+            return res.status(400).json({
+                message : "Invalid OTP"
+            })
+        }
+
+        pending.verified = true
+
+        await pending.save()
+
+        return res.status(200).json({
+            message : "Email verified successfully"
+        })
+    }catch(error){
+        console.error(error);
+
+        return res.status(500).json({
+            message : "Internal Server Error"
+        })
+    }
+}
 
 const registerDoctor = async (req,res)=>{
    try {
@@ -20,11 +124,49 @@ const registerDoctor = async (req,res)=>{
         registrationNumber,
         qualification,
         specialization,
-        workplace
+        workplace,
+        otp
      } = req.body;
 
+     if(!isValidEmail(email)){
+        return res.status(400).json({
+            message : "Enter a valid email address"
+        })
+     }
+
+     const normalised = normaliseEmail(email)
+
+     const pending = await Otp.findOne({
+        email : normalised,
+        purpose : "doctor-register"
+     })
+
+     if(!pending){
+        return res.status(400).json({
+            message : "Request a verification code for this email first"
+        })
+     }
+
+     if(!pending.verified){
+        return res.status(400).json({
+            message : "Verify the code we emailed you before creating your account"
+        })
+     }
+
+     if(pending.expiresAt < Date.now()){
+        return res.status(400).json({
+            message : "That code has expired. Request a new one"
+        })
+     }
+
+     if(pending.otp !== otp){
+        return res.status(400).json({
+            message : "Invalid OTP"
+        })
+     }
+
      const existingDoctor = await Doctor.findOne({
-        $or : [{email},{phone},{registrationNumber}]
+        $or : [{email : normalised},{phone},{registrationNumber}]
      })
 
      if(existingDoctor){
@@ -41,7 +183,7 @@ const registerDoctor = async (req,res)=>{
 
      const doctor = await Doctor.create({
         fullName,
-        email,
+        email : normalised,
         phone,
         password:hashedPassword,
         registrationNumber,
@@ -50,7 +192,9 @@ const registerDoctor = async (req,res)=>{
         dhid,
         workplace
      })
-     
+
+      await Otp.deleteOne({_id : pending._id})
+
       const doctorResponse = await Doctor.findById(
        doctor._id
        ).select("-password");
@@ -104,9 +248,15 @@ const loginDoctor = async (req,res)=>{
             
         )
         
+        // Returned alongside the token so the client can show the doctor's
+        // name immediately instead of painting a nameless header while
+        // /doctors/profile is still in flight.
+        const doctorResponse = await Doctor.findById(doctor._id).select("-password")
+
         return res.status(200).json({
             message : "Login Successfull",
-            token
+            token,
+            doctor : doctorResponse
         })
     }
     catch(error){
@@ -115,7 +265,130 @@ const loginDoctor = async (req,res)=>{
             message : "Internal server error"
         })
     }
-    
+
+}
+
+const forgotPassword = async (req,res) => {
+    try{
+        const {email} = req.body;
+
+        if(!isValidEmail(email)){
+            return res.status(400).json({
+                message : "Enter a valid email address"
+            })
+        }
+
+        const doctor = await Doctor.findOne({email : normaliseEmail(email)})
+
+        if(!doctor){
+            return res.status(404).json({
+                message : "No doctor account is registered with that email"
+            })
+        }
+
+        const otp = generateOtp()
+
+        doctor.resetOtp = otp;
+        doctor.resetOtpExpiry = Date.now() + 10*60*1000
+
+        await doctor.save()
+
+        await sendOtpEmail({
+            to : doctor.email,
+            otp,
+            purpose : "doctor-reset",
+            name : doctor.fullName
+        })
+
+        return res.status(200).json({
+            message : "We emailed a reset code to that address"
+        })
+    }catch(error){
+        console.error(error);
+
+        return res.status(500).json({
+            message : "Internal Server Error"
+        })
+    }
+}
+
+const verifyOtp = async (req,res) => {
+    try{
+        const {email,otp} = req.body;
+
+        const doctor = await Doctor.findOne({email : normaliseEmail(email)})
+
+        if(!doctor){
+            return res.status(404).json({
+                message : "Doctor not found"
+            })
+        }
+
+        if(doctor.resetOtp !== otp){
+            return res.status(400).json({
+                message : "Invalid OTP"
+            })
+        }
+
+        if(doctor.resetOtpExpiry < Date.now()){
+            return res.status(400).json({
+                message : "OTP expired"
+            })
+        }
+
+        return res.status(200).json({
+            message : "OTP verified successfully"
+        })
+    }catch(error){
+        console.error(error);
+
+        return res.status(500).json({
+            message : "Internal Server Error"
+        })
+    }
+}
+
+const resetPassword = async (req,res) => {
+    try{
+        const {email,otp,newPassword} = req.body;
+
+        const doctor = await Doctor.findOne({email : normaliseEmail(email)})
+
+        if(!doctor){
+            return res.status(404).json({
+                message : "Doctor not found"
+            })
+        }
+
+        if(doctor.resetOtp !== otp){
+            return res.status(400).json({
+                message : "Invalid OTP"
+            })
+        }
+
+        if(doctor.resetOtpExpiry < Date.now()){
+            return res.status(400).json({
+                message : "OTP expired"
+            })
+        }
+
+        doctor.password = await bcrypt.hash(newPassword,10)
+
+        doctor.resetOtp = undefined;
+        doctor.resetOtpExpiry = undefined;
+
+        await doctor.save()
+
+        return res.status(200).json({
+            message : "Password reset successful"
+        })
+    }catch(error){
+        console.error(error);
+
+        return res.status(500).json({
+            message : "Internal Server Error"
+        })
+    }
 }
 
 const getDoctorProfile = async (req,res)=>{
@@ -352,11 +625,14 @@ const requestConsent = async (req, res) => {
         doctorId: req.doctor._id,
         action: "CONSENT_REQUESTED",
      })
+    // The code belongs to the patient — they are the one who decides whether
+    // to read it out, so it is deliberately NOT returned here. It reaches
+    // them through GET /patients/consent-requests instead.
     return res.status(201).json({
-      message: "Consent OTP Generated",
+      message: "Consent requested — a code is now waiting in the patient's portal",
       doctorName: req.doctor.fullName,
       dhid: req.doctor.dhid,
-      otp,
+      expiresAt,
     });
 
   } catch (error) {
@@ -478,4 +754,106 @@ const getActiveSessions = async (req,res) => {
   }
 }
 
-export {registerDoctor,loginDoctor,getDoctorProfile,changePassword,updateProfile,searchPatientByOHID,getPatientTimeline,requestConsent,verifyConsent,endSession,getActiveSessions}
+/**
+ * Every patient this doctor has ever opened, newest first.
+ *
+ * The point of this is practical: a doctor should not have to ask the patient
+ * for their OHID again just to reopen a record they already hold consent for.
+ */
+const getAccessedPatients = async (req,res) => {
+  try {
+
+    const logs = await AuditLog.find({
+      doctorId: req.doctor._id
+    })
+    .populate("patientId","fullName ohid")
+    .sort({ createdAt: -1 });
+
+    // Matches the guard `getPatientTimeline` applies, so the flag means the
+    // same thing on the client as it does on the server.
+    const activeSessions = await Consent.find({
+      doctorId: req.doctor._id,
+      isUsed: true,
+      accessGranted: true
+    }).select("patientId");
+
+    const activeIds = new Set(
+      activeSessions.map(session => session.patientId.toString())
+    );
+
+    const byPatient = new Map();
+
+    logs.forEach(log => {
+      const patient = log.patientId;
+
+      if(!patient) return;
+
+      const id = patient._id.toString();
+
+      if(!byPatient.has(id)){
+        byPatient.set(id,{
+          patient : {
+            _id : patient._id,
+            fullName : patient.fullName,
+            ohid : patient.ohid
+          },
+          lastAccessedAt : log.createdAt,
+          events : 0,
+          actions : {},
+          hasActiveSession : activeIds.has(id)
+        });
+      }
+
+      const entry = byPatient.get(id);
+
+      entry.events += 1;
+      entry.actions[log.action] = (entry.actions[log.action] ?? 0) + 1;
+    });
+
+    return res.status(200).json({
+      message : "Accessed patients fetched successfully",
+      patients : [...byPatient.values()]
+    });
+
+  } catch(error) {
+
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Internal Server Error"
+    });
+
+  }
+}
+
+/** The doctor's own chronological audit trail, optionally for one patient. */
+const getDoctorAuditLogs = async (req,res) => {
+  try {
+
+    const { patientId } = req.query;
+
+    const filter = { doctorId : req.doctor._id };
+
+    if(patientId) filter.patientId = patientId;
+
+    const logs = await AuditLog.find(filter)
+      .populate("patientId","fullName ohid")
+      .sort({createdAt:-1});
+
+    return res.status(200).json({
+      message: "Audit logs fetched successfully",
+      logs
+    });
+
+  } catch(error) {
+
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Internal Server Error"
+    });
+
+  }
+}
+
+export {sendDoctorRegistrationOtp,verifyDoctorRegistrationOtp,registerDoctor,loginDoctor,getDoctorProfile,changePassword,updateProfile,searchPatientByOHID,getPatientTimeline,requestConsent,verifyConsent,endSession,getActiveSessions,forgotPassword,verifyOtp,resetPassword,getAccessedPatients,getDoctorAuditLogs}

@@ -1,10 +1,12 @@
 import {Router} from "express"
-import { registerPatient,loginPatient,getPatientProfile,updatePatientProfile,changePassword,forgotPassword,verifyOtp,resetPassword,getMyAuditLogs,revokeConsent,getMyConsents} from "../controllers/patient.controller.js"
+import { sendRegistrationOtp,verifyRegistrationOtp,registerPatient,loginPatient,getPatientProfile,updatePatientProfile,changePassword,forgotPassword,verifyOtp,resetPassword,getMyAuditLogs,revokeConsent,getMyConsents,getConsentRequests} from "../controllers/patient.controller.js"
 import verifyJWT from "../middlewares/auth.middleware.js"
 
 
 const router = Router()
 
+router.post("/register/send-otp",sendRegistrationOtp)
+router.post("/register/verify-otp",verifyRegistrationOtp)
 router.post("/register",registerPatient)
 router.post("/login",loginPatient)
 router.get("/profile",verifyJWT,getPatientProfile)
@@ -16,5 +18,6 @@ router.post("/reset-password",resetPassword);
 router.get("/audit-logs",verifyJWT,getMyAuditLogs)
 router.post("/revoke-consent",verifyJWT,revokeConsent)
 router.get("/my-consents",verifyJWT,getMyConsents)
+router.get("/consent-requests",verifyJWT,getConsentRequests)
 
 export default router
