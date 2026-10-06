@@ -207,6 +207,16 @@ const updateReport = async (req,res) => {
     if (reportName) report.reportName = reportName;
     if (reportType) report.reportType = reportType;
 
+    // Replacing the file is the point of editing a mis-uploaded report: swap
+    // the URL and re-derive the type from the new file's extension.
+    if (req.file) {
+      report.fileUrl = req.file.path;
+      report.fileType = req.file.originalname
+        .split(".")
+        .pop()
+        .toLowerCase();
+    }
+
     await report.save();
 
     return res.status(200).json({

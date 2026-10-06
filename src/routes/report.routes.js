@@ -9,7 +9,7 @@ router.post("/create",verifyPatient,upload.single("file"),createReport);
 router.get("/case/:medicalCaseId",verifyPatient,getReportsByMedicalCase)
 router.get("/:reportId",verifyPatient,getReportById)
 router.delete("/:reportId",verifyPatient,deleteReport)
-router.patch("/:reportId",verifyPatient,updateReport)
+router.patch("/:reportId",verifyPatient,upload.single("file"),updateReport)
 
 export default router
 
