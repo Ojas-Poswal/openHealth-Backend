@@ -1,5 +1,6 @@
 import DigitalWill from "../models/digitalWill.model.js";
 import FamilyGroup from "../models/familyGroup.model.js";
+import DeathCertificate from "../models/deathCertificate.model.js";
 
 const defaultSections = [
     { title: "Personal Message" },
@@ -234,4 +235,98 @@ const approveDeathCertificate = async (req, res) => {
     }
 };
 
-export {createDigitalWill,getMyDigitalWill,updateSection,deleteDigitalWill,getFamilyMemberDigitalWill,approveDeathCertificate}
+/**
+ * Sections are keyed by title (see `updateSection`), so a title has to be
+ * unique within one will or the wrong section would be written to.
+ */
+const addSection = async (req,res) => {
+    try {
+        const { title } = req.body;
+
+        if(!title || !title.trim()){
+            return res.status(400).json({
+                message : "A section title is required"
+            })
+        }
+
+        const cleanTitle = title.trim();
+
+        const digitalWill = await DigitalWill.findOne({
+            patientId: req.patient.patientID
+        });
+
+        if(!digitalWill){
+            return res.status(404).json({
+                message : "Digital Will not found"
+            })
+        }
+
+        const exists = digitalWill.sections.some(
+            section => section.title.toLowerCase() === cleanTitle.toLowerCase()
+        )
+
+        if(exists){
+            return res.status(409).json({
+                message : `You already have a section called "${cleanTitle}"`
+            })
+        }
+
+        digitalWill.sections.push({ title : cleanTitle })
+
+        await digitalWill.save()
+
+        return res.status(201).json({
+            message : "Section added successfully",
+            digitalWill
+        })
+    }catch(error){
+        console.error(error);
+
+        return res.status(500).json({
+            message : "Internal Server Error"
+        })
+    }
+}
+
+const deleteSection = async (req,res) => {
+    try {
+        const { title } = req.body;
+
+        const digitalWill = await DigitalWill.findOne({
+            patientId: req.patient.patientID
+        });
+
+        if(!digitalWill){
+            return res.status(404).json({
+                message : "Digital Will not found"
+            })
+        }
+
+        const before = digitalWill.sections.length;
+
+        digitalWill.sections = digitalWill.sections.filter(
+            section => section.title !== title
+        )
+
+        if(digitalWill.sections.length === before){
+            return res.status(404).json({
+                message : "Section not found"
+            })
+        }
+
+        await digitalWill.save()
+
+        return res.status(200).json({
+            message : "Section deleted successfully",
+            digitalWill
+        })
+    }catch(error){
+        console.error(error);
+
+        return res.status(500).json({
+            message : "Internal Server Error"
+        })
+    }
+}
+
+export {createDigitalWill,getMyDigitalWill,updateSection,addSection,deleteSection,deleteDigitalWill,getFamilyMemberDigitalWill,approveDeathCertificate}
