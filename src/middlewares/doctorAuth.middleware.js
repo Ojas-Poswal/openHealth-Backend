@@ -38,4 +38,24 @@ const verifyDoctor = async (req,res,next) => {
     }
 }
 
+/**
+ * Holds an incomplete doctor account out of every clinical route.
+ *
+ * An account created through Google starts with no registration number. Google
+ * proves the person owns the address — the same thing the emailed OTP proves —
+ * but says nothing about who they are, so the registration number is still
+ * owed before the account can look at anyone's records. A doctor with none can
+ * reach their own profile and nothing else, which is where they supply it.
+ */
+const requireCompleteProfile = (req,res,next) => {
+    if(!req.doctor.registrationNumber){
+        return res.status(403).json({
+            message : "Add your registration number to your profile to continue"
+        })
+    }
+
+    next()
+}
+
+export { requireCompleteProfile }
 export default verifyDoctor

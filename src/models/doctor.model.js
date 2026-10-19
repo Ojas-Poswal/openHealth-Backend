@@ -16,17 +16,29 @@ const doctorSchema = new mongoose.Schema(
         },
         phone : {
             type:String,
-            required:true,
-            unique:true
+            required : function(){ return !this.googleId },
+            unique:true,
+            sparse : true
         },
         password : {
             type : String,
-            required : true
+            required : function(){ return !this.googleId }
         },
         registrationNumber : {
             type:String,
-            required:true,
-            unique:true
+            // A doctor created through Google starts with no registration
+            // number and is held out of every clinical route until they add
+            // one. `sparse` matters as much here as it does on `phone`: the
+            // unique index would otherwise allow only one such pending doctor.
+            required : function(){ return !this.googleId },
+            unique:true,
+            sparse : true
+        },
+        // Set only by the Google path; absent for every password account.
+        googleId : {
+            type : String,
+            unique : true,
+            sparse : true
         },
         qualification : {
             type : String

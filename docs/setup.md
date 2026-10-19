@@ -225,6 +225,45 @@ Examples:
 - JWT_SECRET
 - EMAIL_USER
 - EMAIL_PASSWORD
+- GOOGLE_CLIENT_ID
+
+`GOOGLE_CLIENT_ID` is the OAuth 2.0 **Web** client ID that "Sign in with Google"
+credentials are verified against. It must be the *same* client ID the frontend is built
+with (`VITE_GOOGLE_CLIENT_ID`), or every sign-in fails with an audience mismatch. Leave it
+unset and Google sign-in is simply disabled: the server logs a warning at boot and
+`POST /patients/google` and `POST /doctors/google` answer **503**. It is deliberately not
+a hard boot failure — the rest of the API does not depend on it — but the verification
+code refuses to run without it, because `verifyIdToken` treats a missing audience as
+"do not check the audience at all" and would then accept a token minted for any other
+Google application.
+
+### The `phone` index, and why the server migrates it at boot
+
+Google-created accounts have no phone number, so `phone` changed from a plain unique index
+to a **sparse** one on both `patients` and `doctors`. Mongoose only ever *creates* the
+indexes a schema declares — it never alters one — so against a database that already holds
+the old index this change is a **silent no-op**: MongoDB refuses to change an existing
+index's options, and Mongoose swallows that refusal rather than crashing. The result would
+be an app that works until the *second* phone-less account signs up, at which point the
+missing phone indexes as `null` and collides with the first.
+
+`connectDB()` therefore calls `syncIndexes()` on `Patient` and `Doctor` after connecting —
+the one call that drops the stale index and builds the replacement. It logs when it
+actually changes something:
+
+```
+Patient indexes reconciled — dropped: phone_1
+```
+
+If you would rather do it by hand, the equivalent is:
+
+```js
+db.patients.dropIndex("phone_1")   // then restart — the sparse index is built for you
+db.doctors.dropIndex("phone_1")
+```
+
+The same applies to `doctors.registrationNumber`, which is now sparse as well so that more
+than one doctor can be mid-signup without a registration number.
 
 ### dotenv
 

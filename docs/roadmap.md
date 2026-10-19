@@ -61,10 +61,11 @@ Patient
 
 - Register
 - Login
+- Sign in with Google
 - Forgot Password
 - Verify OTP
 - Reset Password
-- Change Password
+- Change Password (also sets a first password on a Google-created account)
 
 ### Profile
 
@@ -111,6 +112,7 @@ Patient
 
 - Register
 - Login
+- Sign in with Google (creates a pending account — see Access Control)
 - Change Password
 - Update Profile
 
@@ -126,6 +128,9 @@ Search By:
 - Request Access
 - OTP Verification
 - Time-Limited Access
+- Registration number required before any patient record can be opened. A doctor created
+  through Google starts without one, reaches only their own profile, and is directed to
+  complete it; `requireCompleteProfile` answers 403 to every clinical route until then.
 
 ### Timeline Access
 

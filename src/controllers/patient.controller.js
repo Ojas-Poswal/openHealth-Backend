@@ -1,6 +1,7 @@
 import Patient from "../models/patient.model.js"
 import Otp, { issueOtp, generateOtp } from "../models/otp.model.js"
 import { sendOtpEmail } from "../config/mailer.js"
+import verifyGoogleCredential, { GOOGLE_CLIENT_ID } from "../config/google.js"
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 import crypto from "crypto"
@@ -14,6 +15,36 @@ const isValidEmail = (email) =>
     typeof email === "string" && EMAIL_PATTERN.test(email.trim())
 
 const normaliseEmail = (email) => email.trim().toLowerCase()
+
+const signPatientToken = (patient) =>
+    jwt.sign(
+        {
+            patientID : patient._id,
+            ohid : patient.ohid
+        },
+        process.env.JWT_SECRET,
+        {
+            expiresIn : "7d"
+        }
+    )
+
+/**
+ * Shapes a patient for a response.
+ *
+ * The hash never leaves the server, but the client is told whether one
+ * *exists* — the Profile screen has to know whether to ask for the current
+ * password or just a new one, and an account made through Google has none.
+ */
+const toPatientResponse = (patient) => {
+    const plain = patient.toObject();
+
+    delete plain.password;
+
+    return {
+        ...plain,
+        hasPassword : Boolean(patient.password)
+    }
+}
 
 /**
  * Step 1 of registration: prove the address exists before an account is made.
@@ -154,8 +185,16 @@ const registerPatient = async (req,res)=>{
         })
     }
 
+    // Only fields that were actually sent go into the filter. An absent phone
+    // becomes `undefined`, which Mongoose drops from the clause — leaving an
+    // empty `$or` that matches *any* document and rejected every registration
+    // with a false "already registered".
+    const duplicateFilters = [{email : normalised}]
+
+    if(phone) duplicateFilters.push({phone})
+
     const existingPatient = await Patient.findOne({
-        $or : [{email : normalised},{phone}]
+        $or : duplicateFilters
     })
 
     if(existingPatient){
@@ -180,7 +219,7 @@ const registerPatient = async (req,res)=>{
 
     res.status(201).json({
         message : "Patient Registered Successfully",
-        patient
+        patient : toPatientResponse(patient)
     })
     }
     catch(error){
@@ -204,6 +243,15 @@ const loginPatient = async (req,res) => {
             })
         }
 
+        // An account created through Google has no password to compare
+        // against. Without this guard `bcrypt.compare` throws, and the catch
+        // below turns a wrong-choice sign-in into a 500.
+        if(!patient.password){
+            return res.status(401).json({
+                message : "This account signs in with Google"
+            })
+        }
+
         const isPasswordCorrect = await bcrypt.compare(
             password,patient.password
         );
@@ -212,24 +260,13 @@ const loginPatient = async (req,res) => {
                 message : "Invalid Credentials"
             })
         }
-        
-        const token = jwt.sign(
-            {
-                patientID : patient._id,
-                ohid : patient.ohid
-            },
-            process.env.JWT_SECRET,
-            {
-                expiresIn : "7d"
-            }
-        )
 
-        const patientResponse = await Patient.findById(patient._id).select("-password")
+        const token = signPatientToken(patient)
 
         return res.status(200).json({
             message : "Login Successful",
             token,
-            patient : patientResponse
+            patient : toPatientResponse(patient)
         })
     }catch(error){
         console.error(error);
@@ -240,69 +277,218 @@ const loginPatient = async (req,res) => {
     }
 }
 
+/**
+ * Sign in with Google.
+ *
+ * Google hands back a signed token carrying an address it has already verified
+ * — the same guarantee the three-step registration flow exists to produce.
+ * That is why an existing password account can be signed in through this route
+ * without a password: the proof of the address is the whole gate.
+ *
+ * A first-time sign-in creates the account. It has no phone number and no
+ * password, both of which the schema allows precisely for this case.
+ */
+const googleLogin = async (req,res) => {
+    try{
+        const {credential} = req.body;
+
+        if(!GOOGLE_CLIENT_ID){
+            return res.status(503).json({
+                message : "Google sign-in is not configured on this server"
+            })
+        }
+
+        const payload = await verifyGoogleCredential(credential)
+
+        if(!payload){
+            return res.status(401).json({
+                message : "Google sign-in failed. Please try again"
+            })
+        }
+
+        const email = normaliseEmail(payload.email)
+
+        let patient = await Patient.findOne({
+            $or : [{googleId : payload.sub},{email}]
+        })
+
+        if(patient){
+            // An address can only ever be linked to one Google identity. If it
+            // is already someone else's, this is not the same person — a
+            // Workspace admin can delete and recreate an account at the same
+            // address, and that must not hand over the health record with it.
+            if(patient.googleId && patient.googleId !== payload.sub){
+                return res.status(409).json({
+                    message : "That email is already linked to a different Google account"
+                })
+            }
+
+            if(!patient.googleId){
+                patient.googleId = payload.sub;
+                await patient.save();
+            }
+        }else{
+            patient = await createGooglePatient(payload,email)
+
+            if(!patient){
+                return res.status(409).json({
+                    message : "That email was just registered. Try signing in"
+                })
+            }
+        }
+
+        return res.status(200).json({
+            message : "Login Successful",
+            token : signPatientToken(patient),
+            patient : toPatientResponse(patient)
+        })
+    }catch(error){
+        console.error(error);
+
+        return res.status(500).json({
+            message : "Internal Server Error"
+        })
+    }
+}
+
+/**
+ * The create half of the Google sign-in, separated so its duplicate-key case
+ * can be answered instead of falling through to a 500. Two sign-ins for the
+ * same new address — a double click, or two tabs — can both miss the lookup
+ * above; the one that loses simply signs the winner in.
+ */
+const createGooglePatient = async (payload,email) => {
+    try{
+        return await Patient.create({
+            ohid : `OH-${crypto.randomUUID()}`,
+            // `name` is not guaranteed, and fullName is required and trimmed.
+            fullName : payload.name || payload.given_name || email.split("@")[0],
+            email,
+            googleId : payload.sub
+        })
+    }catch(error){
+        if(error?.code === 11000){
+            return await Patient.findOne({email})
+        }
+
+        throw error
+    }
+}
+
 const getPatientProfile = async (req,res)=>{
 
     const patient = await Patient.findById(
         req.patient.patientID
-    ).select("-password")
+    )
+
+    if(!patient){
+        return res.status(404).json({
+            message : "Patient not found"
+        })
+    }
 
     return res.status(200).json({
         message : "Profile fetched successfully",
-        patient,
+        patient : toPatientResponse(patient),
     })
 }
 
 const updatePatientProfile = async (req,res)=>{
     const {fullName,phone,dateOfBirth,gender,bloodGroup,allergies} = req.body;
 
+    const updates = {
+        fullName,
+        dateOfBirth,
+        gender,
+        bloodGroup,
+        allergies
+    }
+
+    // Only a real number is written. An empty string is a real value as far as
+    // the unique index is concerned, so storing one would collide with the
+    // next account that has no phone number either.
+    if(typeof phone === "string" && phone.trim()){
+        updates.phone = phone.trim()
+    }
+
     const patient = await Patient.findByIdAndUpdate(
         req.patient.patientID,
-        {
-            fullName,
-            phone,
-            dateOfBirth,
-            gender,
-            bloodGroup,
-            allergies
-        },
+        updates,
         {
             new : true
         }
-    ).select("-password")
+    )
+
+    if(!patient){
+        return res.status(404).json({
+            message : "Patient not found"
+        })
+    }
 
     return res.status(200).json({
         message : "Profile Updated Successfully",
-        patient
+        patient : toPatientResponse(patient)
     })
 }
 
 const changePassword = async (req,res)=>{
-    const {oldPassword,newPassword} = req.body;
-    const patient = await Patient.findById(
-        req.patient.patientID
-    )
+    try{
+        const {oldPassword,newPassword} = req.body;
 
-    const isPasswordCorrect = await bcrypt.compare(
-        oldPassword,
-        patient.password
-    )
+        if(typeof newPassword !== "string" || !newPassword.trim()){
+            return res.status(400).json({
+                message : "Enter a new password"
+            })
+        }
 
-    if(!isPasswordCorrect){
-        return res.status(401).json({
-            message : "Old password is incorrect"
+        const patient = await Patient.findById(
+            req.patient.patientID
+        )
+
+        if(!patient){
+            return res.status(404).json({
+                message : "Patient not found"
+            })
+        }
+
+        // An account created through Google has no password to confirm. The
+        // request is already authenticated by its own token, so this is where
+        // it gains a first one.
+        const hadPassword = Boolean(patient.password)
+
+        if(hadPassword){
+            const isPasswordCorrect = await bcrypt.compare(
+                oldPassword,
+                patient.password
+            )
+
+            if(!isPasswordCorrect){
+                return res.status(401).json({
+                    message : "Old password is incorrect"
+                })
+            }
+        }
+
+        const hashedPassword = await bcrypt.hash(
+            newPassword,
+            10
+        )
+        patient.password = hashedPassword
+
+        await patient.save();
+
+        return res.status(200).json({
+            message : hadPassword
+                ? "Password Changed successfully"
+                : "Password set successfully"
+        })
+    }catch(error){
+        console.error(error);
+
+        return res.status(500).json({
+            message : "Internal Server Error"
         })
     }
-    const hashedPassword = await bcrypt.hash(
-        newPassword,
-        10
-    )
-    patient.password = hashedPassword
-
-    await patient.save();
-
-    return res.status(200).json({
-        message : "Password Changed successfully"
-    })
 }
 
 const forgotPassword = async (req,res)=>{
@@ -535,4 +721,4 @@ const getConsentRequests = async (req,res) => {
   }
 }
 
-export {sendRegistrationOtp,verifyRegistrationOtp,registerPatient,loginPatient,getPatientProfile,updatePatientProfile,changePassword,forgotPassword,verifyOtp,resetPassword,getMyAuditLogs,revokeConsent,getMyConsents,getConsentRequests}
+export {sendRegistrationOtp,verifyRegistrationOtp,registerPatient,loginPatient,googleLogin,getPatientProfile,updatePatientProfile,changePassword,forgotPassword,verifyOtp,resetPassword,getMyAuditLogs,revokeConsent,getMyConsents,getConsentRequests}

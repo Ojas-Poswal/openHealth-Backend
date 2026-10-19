@@ -16,12 +16,23 @@ const patientSchema = new mongoose.Schema(
         },
         phone : {
             type : String,
-            required : true,
-            unique : true
+            // Required of an email/password account, absent by design for one
+            // created through Google. `sparse` keeps the unique index from
+            // treating every missing phone as the same `null` value, which
+            // would allow only the first Google account to exist.
+            required : function(){ return !this.googleId },
+            unique : true,
+            sparse : true
         },
         password : {
             type : String,
-            required : true,
+            required : function(){ return !this.googleId },
+        },
+        // Set only by the Google path; absent for every password account.
+        googleId : {
+            type : String,
+            unique : true,
+            sparse : true
         },
         dateOfBirth :{
             type : Date,
@@ -38,6 +49,7 @@ const patientSchema = new mongoose.Schema(
         }],
         ohid : {
             type : String,
+            required : true,
             unique : true
         },
         resetOtp: {
