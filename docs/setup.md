@@ -223,24 +223,23 @@ Examples:
 - PORT
 - MONGODB_URI
 - JWT_SECRET
-- EMAIL_USER
-- EMAIL_PASSWORD
-- GOOGLE_CLIENT_ID
+- SMTP_HOST
+- SMTP_PORT
+- SMTP_USER
+- SMTP_PASS
+- MAIL_FROM
 
-`GOOGLE_CLIENT_ID` is the OAuth 2.0 **Web** client ID that "Sign in with Google"
-credentials are verified against. It must be the *same* client ID the frontend is built
-with (`VITE_GOOGLE_CLIENT_ID`), or every sign-in fails with an audience mismatch. Leave it
-unset and Google sign-in is simply disabled: the server logs a warning at boot and
-`POST /patients/google` and `POST /doctors/google` answer **503**. It is deliberately not
-a hard boot failure — the rest of the API does not depend on it — but the verification
-code refuses to run without it, because `verifyIdToken` treats a missing audience as
-"do not check the audience at all" and would then accept a token minted for any other
-Google application.
+Mail is sent through Brevo's SMTP relay (`smtp-relay.brevo.com`, port 587 by default).
+The free plan allows 300 emails per day. `SMTP_USER` is the Brevo account login and
+`SMTP_PASS` is an SMTP key generated under **SMTP & API → SMTP** (not the API v3 key).
+`MAIL_FROM` must be a sender address verified under **Senders, Domains & IPs → Senders**;
+Brevo rejects unverified senders. When the three `SMTP_*` credentials are missing the
+transport is skipped with a warning and the rest of the API still boots.
 
 ### The `phone` index, and why the server migrates it at boot
 
-Google-created accounts have no phone number, so `phone` changed from a plain unique index
-to a **sparse** one on both `patients` and `doctors`. Mongoose only ever *creates* the
+Some older accounts may have no phone number, so `phone` is a **sparse** unique index on
+both `patients` and `doctors`. Mongoose only ever *creates* the
 indexes a schema declares — it never alters one — so against a database that already holds
 the old index this change is a **silent no-op**: MongoDB refuses to change an existing
 index's options, and Mongoose swallows that refusal rather than crashing. The result would

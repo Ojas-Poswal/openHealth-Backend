@@ -1,5 +1,5 @@
 import {Router} from "express"
-import { sendRegistrationOtp,verifyRegistrationOtp,registerPatient,loginPatient,googleLogin,getPatientProfile,updatePatientProfile,changePassword,forgotPassword,verifyOtp,resetPassword,getMyAuditLogs,revokeConsent,getMyConsents,getConsentRequests} from "../controllers/patient.controller.js"
+import { sendRegistrationOtp,verifyRegistrationOtp,registerPatient,loginPatient,getPatientProfile,updatePatientProfile,changePassword,forgotPassword,verifyOtp,resetPassword,getMyAuditLogs,revokeConsent,getMyConsents,getConsentRequests} from "../controllers/patient.controller.js"
 import verifyJWT from "../middlewares/auth.middleware.js"
 
 
@@ -9,7 +9,6 @@ router.post("/register/send-otp",sendRegistrationOtp)
 router.post("/register/verify-otp",verifyRegistrationOtp)
 router.post("/register",registerPatient)
 router.post("/login",loginPatient)
-router.post("/google",googleLogin)
 router.get("/profile",verifyJWT,getPatientProfile)
 router.patch("/profile",verifyJWT,updatePatientProfile)
 router.patch("/change-password",verifyJWT,changePassword)

@@ -8,14 +8,15 @@ import nodemailer from "nodemailer";
  *
  * The one-time codes for registration and password reset are the only thing
  * openHealth emails, so this module owns both the transport and the message
- * templates. Credentials come from the environment (Mailtrap's sandbox by
- * default) and when they are missing the transport is skipped with a warning
- * instead of throwing, so the API still boots before mail is set up.
+ * templates. Credentials come from the environment — Brevo's SMTP relay by
+ * default, though any SMTP provider works — and when they are missing the
+ * transport is skipped with a warning instead of throwing, so the API still
+ * boots before mail is set up.
  */
 
 const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, MAIL_FROM } = process.env;
 
-const port = Number(SMTP_PORT) || 2525;
+const port = Number(SMTP_PORT) || 587;
 
 const configured = Boolean(SMTP_HOST && SMTP_USER && SMTP_PASS);
 
@@ -24,6 +25,9 @@ const transporter = configured
       host: SMTP_HOST,
       port,
       secure: port === 465,
+      // Port 587 starts in the clear and upgrades via STARTTLS. Requiring the
+      // upgrade keeps the SMTP credentials off the wire unencrypted.
+      requireTLS: port === 587,
       auth: {
         user: SMTP_USER,
         pass: SMTP_PASS,
@@ -31,6 +35,8 @@ const transporter = configured
     })
   : null;
 
+// Brevo only accepts a sender address verified in its dashboard, so
+// MAIL_FROM must be set in production. The fallback keeps local boots quiet.
 const FROM = MAIL_FROM || "openHealth <no-reply@openhealth.app>";
 
 console.log(

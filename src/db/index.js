@@ -10,8 +10,8 @@ import Doctor from "../models/doctor.model.js"
  * nothing on a database that already holds the old index: MongoDB refuses to
  * change the options of an existing index, and Mongoose swallows that refusal
  * rather than crashing. The result is a silent no-op and an app that works
- * until the *second* Google account signs up, at which point the missing phone
- * indexes as `null` and collides with the first one.
+ * until the *second* phone-less account signs up, at which point the missing
+ * phone indexes as `null` and collides with the first one.
  *
  * `syncIndexes` is the one call that drops the stale index and builds the new
  * one. It is scoped to these two models on purpose — the global

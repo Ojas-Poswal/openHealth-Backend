@@ -1,7 +1,6 @@
 import Patient from "../models/patient.model.js"
 import Otp, { issueOtp, generateOtp } from "../models/otp.model.js"
 import { sendOtpEmail } from "../config/mailer.js"
-import verifyGoogleCredential, { GOOGLE_CLIENT_ID } from "../config/google.js"
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 import crypto from "crypto"
@@ -28,22 +27,13 @@ const signPatientToken = (patient) =>
         }
     )
 
-/**
- * Shapes a patient for a response.
- *
- * The hash never leaves the server, but the client is told whether one
- * *exists* — the Profile screen has to know whether to ask for the current
- * password or just a new one, and an account made through Google has none.
- */
+/** Shapes a patient for a response. The hash never leaves the server. */
 const toPatientResponse = (patient) => {
     const plain = patient.toObject();
 
     delete plain.password;
 
-    return {
-        ...plain,
-        hasPassword : Boolean(patient.password)
-    }
+    return plain
 }
 
 /**
@@ -243,12 +233,12 @@ const loginPatient = async (req,res) => {
             })
         }
 
-        // An account created through Google has no password to compare
-        // against. Without this guard `bcrypt.compare` throws, and the catch
-        // below turns a wrong-choice sign-in into a 500.
+        // An account without a stored password has nothing to compare against.
+        // Without this guard `bcrypt.compare` throws, and the catch below turns
+        // a wrong-choice sign-in into a 500.
         if(!patient.password){
             return res.status(401).json({
-                message : "This account signs in with Google"
+                message : "This account has no password. Reset it to sign in."
             })
         }
 
@@ -274,104 +264,6 @@ const loginPatient = async (req,res) => {
         return res.status(500).json({
             message : "Internal Server Error"
         })
-    }
-}
-
-/**
- * Sign in with Google.
- *
- * Google hands back a signed token carrying an address it has already verified
- * — the same guarantee the three-step registration flow exists to produce.
- * That is why an existing password account can be signed in through this route
- * without a password: the proof of the address is the whole gate.
- *
- * A first-time sign-in creates the account. It has no phone number and no
- * password, both of which the schema allows precisely for this case.
- */
-const googleLogin = async (req,res) => {
-    try{
-        const {credential} = req.body;
-
-        if(!GOOGLE_CLIENT_ID){
-            return res.status(503).json({
-                message : "Google sign-in is not configured on this server"
-            })
-        }
-
-        const payload = await verifyGoogleCredential(credential)
-
-        if(!payload){
-            return res.status(401).json({
-                message : "Google sign-in failed. Please try again"
-            })
-        }
-
-        const email = normaliseEmail(payload.email)
-
-        let patient = await Patient.findOne({
-            $or : [{googleId : payload.sub},{email}]
-        })
-
-        if(patient){
-            // An address can only ever be linked to one Google identity. If it
-            // is already someone else's, this is not the same person — a
-            // Workspace admin can delete and recreate an account at the same
-            // address, and that must not hand over the health record with it.
-            if(patient.googleId && patient.googleId !== payload.sub){
-                return res.status(409).json({
-                    message : "That email is already linked to a different Google account"
-                })
-            }
-
-            if(!patient.googleId){
-                patient.googleId = payload.sub;
-                await patient.save();
-            }
-        }else{
-            patient = await createGooglePatient(payload,email)
-
-            if(!patient){
-                return res.status(409).json({
-                    message : "That email was just registered. Try signing in"
-                })
-            }
-        }
-
-        return res.status(200).json({
-            message : "Login Successful",
-            token : signPatientToken(patient),
-            patient : toPatientResponse(patient)
-        })
-    }catch(error){
-        console.error(error);
-
-        return res.status(500).json({
-            message : "Internal Server Error"
-        })
-    }
-}
-
-/**
- * The create half of the Google sign-in, separated so its duplicate-key case
- * can be answered instead of falling through to a 500. Two sign-ins for the
- * same new address — a double click, or two tabs — can both miss the lookup
- * above; the one that loses simply signs the winner in.
- */
-const createGooglePatient = async (payload,email) => {
-    try{
-        return await Patient.create({
-            ohid : `OH-${crypto.randomUUID()}`,
-            // `name` is not guaranteed, and fullName is required and trimmed.
-            fullName : payload.name || payload.given_name || email.split("@")[0],
-            email,
-            googleId : payload.sub
-        })
-    }catch(error){
-        if(error?.code === 11000){
-            return await Patient.findOne({email})
-        }
-
-        throw error
     }
 }
 
@@ -451,7 +343,7 @@ const changePassword = async (req,res)=>{
             })
         }
 
-        // An account created through Google has no password to confirm. The
+        // An account with no stored password has nothing to confirm. The
         // request is already authenticated by its own token, so this is where
         // it gains a first one.
         const hadPassword = Boolean(patient.password)
@@ -721,4 +613,4 @@ const getConsentRequests = async (req,res) => {
   }
 }
 
-export {sendRegistrationOtp,verifyRegistrationOtp,registerPatient,loginPatient,googleLogin,getPatientProfile,updatePatientProfile,changePassword,forgotPassword,verifyOtp,resetPassword,getMyAuditLogs,revokeConsent,getMyConsents,getConsentRequests}
+export {sendRegistrationOtp,verifyRegistrationOtp,registerPatient,loginPatient,getPatientProfile,updatePatientProfile,changePassword,forgotPassword,verifyOtp,resetPassword,getMyAuditLogs,revokeConsent,getMyConsents,getConsentRequests}
